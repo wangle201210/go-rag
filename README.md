@@ -27,6 +27,11 @@ docker run -d --name elasticsearch \
   -p 9300:9300 \
   elasticsearch:8.18.0
 ```
+配置环境变量(也可以在[文件](./common/embedding.go)中直接配置)
+```bash 
+export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+export OPENAI_BASE_URL=YOUR_OPENAI_BASE_URL
+```
 加载各种数据源的数据，并将其向量化后存储进向量数据库。
 ```golang
 // Index
