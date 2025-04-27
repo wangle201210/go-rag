@@ -11,17 +11,14 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/wangle201210/go-rag/common"
+	"github.com/wangle201210/go-rag/config"
 )
 
 // newRetriever component initialization function of node 'Retriever1' in graph 'retriever'
-func newRetriever(ctx context.Context) (rtr retriever.Retriever, err error) {
-	client, err := common.GetESClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	config := &es8.RetrieverConfig{
-		Client: client,
-		Index:  common.IndexName,
+func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retriever, err error) {
+	retrieverConfig := &es8.RetrieverConfig{
+		Client: conf.Client,
+		Index:  conf.IndexName,
 		TopK:   5,
 		SearchMode: search_mode.SearchModeDenseVectorSimilarity(
 			search_mode.DenseVectorSimilarityTypeCosineSimilarity,
@@ -67,12 +64,12 @@ func newRetriever(ctx context.Context) (rtr retriever.Retriever, err error) {
 			return doc, nil
 		},
 	}
-	embeddingIns11, err := common.NewEmbedding(ctx)
+	embeddingIns11, err := common.NewEmbedding(ctx, conf)
 	if err != nil {
 		return nil, err
 	}
-	config.Embedding = embeddingIns11
-	rtr, err = es8.NewRetriever(ctx, config)
+	retrieverConfig.Embedding = embeddingIns11
+	rtr, err = es8.NewRetriever(ctx, retrieverConfig)
 	if err != nil {
 		return nil, err
 	}

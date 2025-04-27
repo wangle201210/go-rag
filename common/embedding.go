@@ -6,17 +6,27 @@ import (
 
 	"github.com/cloudwego/eino-ext/components/embedding/openai"
 	"github.com/cloudwego/eino/components/embedding"
+	"github.com/wangle201210/go-rag/config"
 )
 
-func NewEmbedding(ctx context.Context) (eb embedding.Embedder, err error) {
-	config := &openai.EmbeddingConfig{
-		APIKey:     os.Getenv("OPENAI_API_KEY"),
-		Model:      "text-embedding-3-large",
+func NewEmbedding(ctx context.Context, conf *config.Config) (eb embedding.Embedder, err error) {
+	econf := &openai.EmbeddingConfig{
+		APIKey:     conf.APIKey,
+		Model:      conf.Model,
 		Dimensions: Of(1024),
 		Timeout:    0,
-		BaseURL:    os.Getenv("OPENAI_BASE_URL"),
+		BaseURL:    conf.BaseURL,
 	}
-	eb, err = openai.NewEmbedder(ctx, config)
+	if econf.APIKey == "" {
+		econf.APIKey = os.Getenv("OPENAI_API_KEY")
+	}
+	if econf.BaseURL == "" {
+		econf.BaseURL = os.Getenv("OPENAI_BASE_URL")
+	}
+	if econf.Model == "" {
+		econf.Model = "text-embedding-3-large"
+	}
+	eb, err = openai.NewEmbedder(ctx, econf)
 	if err != nil {
 		return nil, err
 	}

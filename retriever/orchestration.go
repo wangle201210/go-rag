@@ -5,15 +5,16 @@ import (
 
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
+	"github.com/wangle201210/go-rag/config"
 )
 
-func BuildRetriever(ctx context.Context) (r compose.Runnable[string, []*schema.Document], err error) {
+func BuildRetriever(ctx context.Context, conf *config.Config) (r compose.Runnable[string, []*schema.Document], err error) {
 	const (
 		Retriever1           = "Retriever1"
 		DocumentTransformer1 = "DocumentTransformer1"
 	)
 	g := compose.NewGraph[string, []*schema.Document]()
-	retriever1KeyOfRetriever, err := newRetriever(ctx)
+	retriever1KeyOfRetriever, err := newRetriever(ctx, conf)
 	if err != nil {
 		return nil, err
 	}

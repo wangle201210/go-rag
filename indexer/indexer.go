@@ -9,17 +9,14 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/google/uuid"
 	"github.com/wangle201210/go-rag/common"
+	"github.com/wangle201210/go-rag/config"
 )
 
 // newIndexer component initialization function of node 'Indexer2' in graph 'rag'
-func newIndexer(ctx context.Context) (idr indexer.Indexer, err error) {
-	client, err := common.GetESClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	config := &es8.IndexerConfig{
-		Client:    client,
-		Index:     common.IndexName,
+func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, err error) {
+	indexerConfig := &es8.IndexerConfig{
+		Client:    conf.Client,
+		Index:     conf.IndexName,
 		BatchSize: 10,
 		DocumentToFields: func(ctx context.Context, doc *schema.Document) (field2Value map[string]es8.FieldValue, err error) {
 			if doc.ID == "" {
@@ -40,12 +37,12 @@ func newIndexer(ctx context.Context) (idr indexer.Indexer, err error) {
 			}, nil
 		},
 	}
-	embeddingIns11, err := common.NewEmbedding(ctx)
+	embeddingIns11, err := common.NewEmbedding(ctx, conf)
 	if err != nil {
 		return nil, err
 	}
-	config.Embedding = embeddingIns11
-	idr, err = es8.NewIndexer(ctx, config)
+	indexerConfig.Embedding = embeddingIns11
+	idr, err = es8.NewIndexer(ctx, indexerConfig)
 	if err != nil {
 		return nil, err
 	}

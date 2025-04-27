@@ -27,55 +27,52 @@ docker run -d --name elasticsearch \
   -p 9300:9300 \
   elasticsearch:8.18.0
 ```
-配置环境变量(也可以在[文件](./common/embedding.go)中直接配置)
-```bash 
-export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-export OPENAI_BASE_URL=YOUR_OPENAI_BASE_URL
+初始化Rag对象
+```go
+    client, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: []string{"http://localhost:9200"},
+	})
+	if err != nil {
+		log.Printf("NewClient of es8 failed, err=%v", err)
+		return
+	}
+	ragSvr, err = New(context.Background(), &config.Config{
+		Client:    client,
+		IndexName: "rag",
+		APIKey:    os.Getenv("OPENAI_API_KEY"),
+		BaseURL:   os.Getenv("OPENAI_BASE_URL"),
+		Model:     "text-embedding-3-large",
+	})
+	if err != nil {
+		log.Printf("New of rag failed, err=%v", err)
+		return
+	}
 ```
 加载各种数据源的数据，并将其向量化后存储进向量数据库。
 ```golang
-// Index
-// uri: 文档地址，可以是文件路径（pdf，html，md等），也可以是网址
-// ids: 文档id
-func Index(uri string) (ids []string, err error) {
-    buildIndex, err := indexer.BuildIndexer(context.Background())
+    ids, err := ragSvr.Index("./test_file/readme.md")
     if err != nil {
-        return
+        t.Fatal(err)
     }
-    s := document.Source{
-        URI: uri,
+    for _, id := range ids {
+        t.Log(id)
     }
-	// 这个buildIndex可以复用
-    ids, err = buildIndex.Invoke(context.Background(), s)
-    if err != nil {
-        return
-    }
-    return
-}
-
-
+    ragSvr.Index("./test_file/readme2.md")
+    ragSvr.Index("./test_file/readme.html")
+    ragSvr.Index("./test_file/test.pdf")
+    ragSvr.Index("https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html")
+    ... ...
 ```
 检索
 ```go
-// Retrieve
-// input: 检索关键词
-// score: 0-2, 0 完全相反，1 毫不相干，2 完全相同
-func Retrieve(input string, score float64) (msg []*schema.Document, err error) {
-	r, err := retriever.BuildRetriever(context.Background())
-	if err != nil {
-		return
-	}
-	// 这个r可以复用
-	msg, err = r.Invoke(context.Background(), input,
-		compose.WithRetrieverOption(
-			er.WithScoreThreshold(score),
-			er.WithTopK(5),
-		),
-	)
-	if err != nil {
-		return
-	}
-	return
-}
+    msg, err := ragSvr.Retrieve("这里有很多内容", 1.5, 5)
+    if err != nil {
+        t.Fatal(err)
+    }
+    for _, m := range msg {
+        t.Logf("content: %v, score: %v", m.Content, m.Score())
+    }
+    msg, err = ragSvr.Retrieve("代码解析", 1.5, 5)
+    ... ...
 ```
 详情可以参照[test文件](./rag_test.go)

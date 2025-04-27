@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"github.com/cloudwego/eino/compose"
+	"github.com/wangle201210/go-rag/config"
 )
 
-func BuildIndexer(ctx context.Context) (r compose.Runnable[any, []string], err error) {
+func BuildIndexer(ctx context.Context, conf *config.Config) (r compose.Runnable[any, []string], err error) {
 	const (
 		Loader1              = "Loader1"
 		Indexer2             = "Indexer2"
@@ -18,7 +19,7 @@ func BuildIndexer(ctx context.Context) (r compose.Runnable[any, []string], err e
 		return nil, err
 	}
 	_ = g.AddLoaderNode(Loader1, loader1KeyOfLoader)
-	indexer2KeyOfIndexer, err := newIndexer(ctx)
+	indexer2KeyOfIndexer, err := newIndexer(ctx, conf)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +33,7 @@ func BuildIndexer(ctx context.Context) (r compose.Runnable[any, []string], err e
 	_ = g.AddEdge(Loader1, DocumentTransformer3)
 	_ = g.AddEdge(DocumentTransformer3, Indexer2)
 	_ = g.AddEdge(Indexer2, compose.END)
-	r, err = g.Compile(ctx, compose.WithGraphName("rag"))
+	r, err = g.Compile(ctx, compose.WithGraphName("indexer"))
 	if err != nil {
 		return nil, err
 	}
