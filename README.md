@@ -10,6 +10,7 @@
 - [x] 文档检索
 - [x] 长文档自动切割(chunk)
 - [x] rerank
+- [x] 提供http接口 [rag-api](./server/README.md)
 
 ## 未来计划
 - [ ] 使用mysql存储chunk和文档的映射关系，目前放在es的ext字段
