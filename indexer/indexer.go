@@ -19,9 +19,9 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 		Index:     conf.IndexName,
 		BatchSize: 10,
 		DocumentToFields: func(ctx context.Context, doc *schema.Document) (field2Value map[string]es8.FieldValue, err error) {
-			if doc.ID == "" {
-				doc.ID = uuid.New().String()
-			}
+			// if doc.ID == "" {
+			doc.ID = uuid.New().String()
+			// }
 			if doc.MetaData != nil {
 				marshal, _ := sonic.Marshal(doc.MetaData)
 				doc.MetaData[common.DocExtra] = string(marshal)
