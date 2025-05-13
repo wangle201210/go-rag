@@ -1,0 +1,23 @@
+server:
+  address:     ":8000"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+
+logger:
+  level : "all"
+  stdout: true
+
+es:
+  address: "http://127.0.0.1:9200"
+  indexName: "rag-test"
+
+embedding:
+  model: "text-embedding-3-large"
+  apiKey: "sk-***"
+  baseURL: "https://api.openai.com/v1"
+
+chat:
+  apiKey: "sk-***"
+  baseURL: "https://api.openai.com/v1"
+  model: "gpt-4o"
+  history: "root:123456@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"

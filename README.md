@@ -30,6 +30,16 @@ docker run -d --name elasticsearch \
   -p 9300:9300 \
   elasticsearch:8.18.0
 ```
+安装mysql
+```bash
+docker run -p 3306:3306 --name mysql \
+    -v /Users/wanna/docker/mysql/log:/var/log/mysql \
+    -v /Users/wanna/docker/mysql/data:/var/lib/mysql \
+    -v /Users/wanna/docker/mysql/conf:/etc/mysql \
+    --restart=always \
+    -e MYSQL_ROOT_PASSWORD=123456 \
+    -d mysql:8.0
+```
 初始化Rag对象
 ```go
     client, err := elasticsearch.NewClient(elasticsearch.Config{

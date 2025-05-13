@@ -1,11 +1,11 @@
-package logic
+package rag
 
 import (
 	"context"
 	"log"
-	"os"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag"
 	"github.com/wangle201210/go-rag/config"
 )
@@ -13,19 +13,20 @@ import (
 var ragSvr = &rag.Rag{}
 
 func init() {
+	ctx := context.Background()
 	client, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{"http://localhost:9200"},
+		Addresses: []string{g.Cfg().MustGet(ctx, "es.address").String()},
 	})
 	if err != nil {
 		log.Printf("NewClient of es8 failed, err=%v", err)
 		return
 	}
-	ragSvr, err = rag.New(context.Background(), &config.Config{
+	ragSvr, err = rag.New(ctx, &config.Config{
 		Client:    client,
-		IndexName: "rag-test",
-		APIKey:    os.Getenv("OPENAI_API_KEY"),
-		BaseURL:   os.Getenv("OPENAI_BASE_URL"),
-		Model:     "text-embedding-3-large",
+		IndexName: g.Cfg().MustGet(ctx, "es.indexName").String(),
+		APIKey:    g.Cfg().MustGet(ctx, "embedding.apiKey").String(),
+		BaseURL:   g.Cfg().MustGet(ctx, "embedding.baseURL").String(),
+		Model:     g.Cfg().MustGet(ctx, "embedding.model").String(),
 	})
 	if err != nil {
 		log.Printf("New of rag failed, err=%v", err)

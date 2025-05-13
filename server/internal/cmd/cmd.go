@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
-	"github.com/wangle201210/go-rag/server/internal/controller/retriever"
+	"github.com/wangle201210/go-rag/server/internal/controller/rag"
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
-					retriever.NewV1(),
+					rag.NewV1(),
 				)
 			})
 			s.Run()

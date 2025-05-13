@@ -6,8 +6,10 @@ replace github.com/wangle201210/go-rag => ../
 
 require (
 	github.com/cloudwego/eino v0.3.31
+	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250512035704-1e06fdfda207
 	github.com/elastic/go-elasticsearch/v8 v8.16.0
 	github.com/gogf/gf/v2 v2.9.0
+	github.com/wangle201210/chat-history v0.0.0-20250402104704-5eec15d5419e
 	github.com/wangle201210/go-rag v0.0.0-20250427112217-768521a35d1f
 )
 
@@ -30,7 +32,7 @@ require (
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20250424061409-ccd60fbc7c1c // indirect
 	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250424061409-ccd60fbc7c1c // indirect
 	github.com/cloudwego/eino-ext/components/retriever/es8 v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250331101427-906b8d194a99 // indirect
+	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250422092704-54e372e1fa3d // indirect
 	github.com/dslipak/pdf v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elastic/elastic-transport-go/v8 v8.7.0 // indirect
@@ -42,12 +44,15 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
 	github.com/go-openapi/swag v0.23.1 // indirect
+	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grokify/html-strip-tags-go v0.1.0 // indirect
 	github.com/invopop/yaml v0.1.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
@@ -56,6 +61,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
+	github.com/meguminnnnnnnnn/go-openai v0.0.0-20250408071642-761325becfd6 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -66,7 +72,6 @@ require (
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/sashabaranov/go-openai v1.38.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/slongfield/pyfmt v0.0.0-20220222012616-ea85ff4c361f // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
@@ -81,4 +86,6 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/mysql v1.5.7 // indirect
+	gorm.io/gorm v1.25.12 // indirect
 )
