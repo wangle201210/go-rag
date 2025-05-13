@@ -10,6 +10,12 @@ import (
 
 func (c *ControllerV1) Retriever(ctx context.Context, req *v1.RetrieverReq) (res *v1.RetrieverRes, err error) {
 	ragSvr := rag.GetRagSvr()
+	if req.TopK == 0 {
+		req.TopK = 5
+	}
+	if req.Score == 0 {
+		req.Score = 0.2
+	}
 	if req.Score < 1.0 {
 		req.Score += 1
 	}

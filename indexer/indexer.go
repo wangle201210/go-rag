@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bytedance/sonic"
 	"github.com/cloudwego/eino-ext/components/indexer/es8"
@@ -28,7 +29,7 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 			}
 			return map[string]es8.FieldValue{
 				common.FieldContent: {
-					Value:    doc.Content,
+					Value:    getMdContentWithTitle(doc),
 					EmbedKey: common.FieldContentVector, // vectorize doc content and save vector to field "content_vector"
 				},
 				common.FieldExtra: {
@@ -47,4 +48,21 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 		return nil, err
 	}
 	return idr, nil
+}
+
+func getMdContentWithTitle(doc *schema.Document) string {
+	if doc.MetaData == nil {
+		return doc.Content
+	}
+	title := ""
+	list := []string{"h1", "h2", "h3", "h4", "h5", "h6"}
+	for _, v := range list {
+		if d, e := doc.MetaData[v].(string); e && len(d) > 0 {
+			title += fmt.Sprintf("%s:%s ", v, d)
+		}
+	}
+	if len(title) == 0 {
+		return doc.Content
+	}
+	return title + "\n" + doc.Content
 }

@@ -6,10 +6,10 @@ import (
 
 type ChatReq struct {
 	g.Meta   `path:"/v1/chat" method:"post" tags:"rag"`
-	ConvID   string  `json:"conv_id"` // 会话id
-	Question string  `json:"question"`
-	TopK     int     `json:"top_k"` // 如果需要检索文档则需要传入
-	Score    float64 `json:"score"` // 如果需要检索文档则需要传入
+	ConvID   string  `json:"conv_id" v:"required"` // 会话id
+	Question string  `json:"question" v:"required"`
+	TopK     int     `json:"top_k"` // 默认为5
+	Score    float64 `json:"score"` // 默认为0.2
 }
 
 type ChatRes struct {

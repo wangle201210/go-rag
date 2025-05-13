@@ -7,6 +7,15 @@ rag api 项目
 go run main.go
 ```
 
+## indexer
+解析文件并向量化到es
+```bash
+curl --request POST \
+  --url http://localhost:8000/v1/indexer \
+  --header 'content-type: multipart/form-data' \
+  --form 'file=[object Object]'
+```
+
 ## retriever
 根据用户提问检索文档
 ```bash
