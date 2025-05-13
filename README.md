@@ -8,6 +8,9 @@
 - [x] md、pdf、html 文档解析
 - [x] 网页解析
 - [x] 文档检索
+- [x] 长文档自动切割(chunk)
+- [x] rerank
+- [x] 提供http接口 [rag-api](./server/README.md)
 
 ## 未来计划
 - [ ] 使用mysql存储chunk和文档的映射关系，目前放在es的ext字段
@@ -26,6 +29,16 @@ docker run -d --name elasticsearch \
   -p 9200:9200 \
   -p 9300:9300 \
   elasticsearch:8.18.0
+```
+安装mysql
+```bash
+docker run -p 3306:3306 --name mysql \
+    -v /Users/wanna/docker/mysql/log:/var/log/mysql \
+    -v /Users/wanna/docker/mysql/data:/var/lib/mysql \
+    -v /Users/wanna/docker/mysql/conf:/etc/mysql \
+    --restart=always \
+    -e MYSQL_ROOT_PASSWORD=123456 \
+    -d mysql:8.0
 ```
 初始化Rag对象
 ```go

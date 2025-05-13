@@ -25,8 +25,8 @@ func BuildRetriever(ctx context.Context, conf *config.Config) (r compose.Runnabl
 	}
 	_ = g.AddDocumentTransformerNode(DocumentTransformer1, documentTransformer1KeyOfDocumentTransformer)
 	_ = g.AddEdge(compose.START, Retriever1)
-	_ = g.AddEdge(DocumentTransformer1, compose.END)
 	_ = g.AddEdge(Retriever1, DocumentTransformer1)
+	_ = g.AddEdge(DocumentTransformer1, compose.END)
 	r, err = g.Compile(ctx, compose.WithGraphName("retriever"))
 	if err != nil {
 		return nil, err
