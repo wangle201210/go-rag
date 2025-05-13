@@ -26,3 +26,4 @@ go.work.sum
 .idea
 
 server/manifest/config/config.yaml
+/server/uploads/

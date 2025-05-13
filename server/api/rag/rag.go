@@ -12,5 +12,6 @@ import (
 
 type IRagV1 interface {
 	Chat(ctx context.Context, req *v1.ChatReq) (res *v1.ChatRes, err error)
+	Indexer(ctx context.Context, req *v1.IndexerReq) (res *v1.IndexerRes, err error)
 	Retriever(ctx context.Context, req *v1.RetrieverReq) (res *v1.RetrieverRes, err error)
 }
