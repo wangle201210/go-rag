@@ -2,6 +2,7 @@ package rag
 
 import (
 	"context"
+	"sort"
 
 	"github.com/wangle201210/go-rag/server/internal/logic/rag"
 
@@ -32,6 +33,10 @@ func (c *ControllerV1) Retriever(ctx context.Context, req *v1.RetrieverReq) (res
 			}
 		}
 	}
+	// eino 默认是把分高的排在两边，这里我xiu gai
+	sort.Slice(msg, func(i, j int) bool {
+		return msg[i].Score() > msg[j].Score()
+	})
 	res = &v1.RetrieverRes{
 		Document: msg,
 	}

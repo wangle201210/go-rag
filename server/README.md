@@ -1,14 +1,25 @@
 # go-rag api
 rag api 项目
 
-## 运行
-在当前目录下
+## api 运行
+
 ```bash
-go run main.go
+$ cd server
+$ go mod tidy
+$ go run main.go
 ```
 
+## fe 运行
+
+```bash
+$ cd fe
+$ npm install
+$ npm run dev
+```
+
+
 ## indexer
-解析文件并向量化到es
+解析文件并向量化到es ![](./static/indexer.png)
 ```bash
 curl --request POST \
   --url http://localhost:8000/v1/indexer \
@@ -17,7 +28,7 @@ curl --request POST \
 ```
 
 ## retriever
-根据用户提问检索文档
+根据用户提问检索文档![](./static/retriever.png)
 ```bash
 curl --request POST \
   --url http://localhost:8000/v1/retriever \
@@ -30,7 +41,7 @@ curl --request POST \
 ```
 
 ## chat
-检索到文档后回答用户问题
+检索到文档后回答用户问题![](./static/chat.png)
 ```bash
 curl --request POST \
   --url http://localhost:8000/v1/chat \
