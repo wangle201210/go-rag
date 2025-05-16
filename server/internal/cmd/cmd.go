@@ -17,8 +17,8 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
-				s.AddStaticPath("/", "./static/fe")
-				s.SetRewrite("index.html", "./static/fe/index.html")
+				s.AddStaticPath("", "./static/fe/")
+				s.SetIndexFiles([]string{"index.html"})
 				group.Middleware(ghttp.MiddlewareHandlerResponse, ghttp.MiddlewareCORS)
 				group.Bind(
 					rag.NewV1(),

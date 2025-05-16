@@ -2,6 +2,7 @@ package rag
 
 import (
 	"context"
+	"encoding/json"
 	"sort"
 
 	"github.com/wangle201210/go-rag/server/internal/logic/rag"
@@ -31,6 +32,11 @@ func (c *ControllerV1) Retriever(ctx context.Context, req *v1.RetrieverReq) (res
 				vf := v.(float64)
 				document.MetaData["_score"] = vf - 1
 			}
+			m := make(map[string]interface{})
+			if err = json.Unmarshal([]byte(document.MetaData["ext"].(string)), &m); err != nil {
+				return
+			}
+			document.MetaData["ext"] = m
 		}
 	}
 	// eino 默认是把分高的排在两边，这里我xiu gai

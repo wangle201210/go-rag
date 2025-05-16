@@ -27,3 +27,6 @@ clean:
 # 构建Docker镜像
 docker-build: build
 	docker build -t go-rag:latest -f Dockerfile .
+
+run-local:
+	cd server && go mod tidy && go run .

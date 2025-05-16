@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/cloudwego/eino/schema"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
@@ -13,6 +14,7 @@ type ChatReq struct {
 }
 
 type ChatRes struct {
-	g.Meta `mime:"application/json"`
-	Answer string `json:"answer"`
+	g.Meta     `mime:"application/json"`
+	Answer     string             `json:"answer"`
+	References []*schema.Document `json:"references"`
 }

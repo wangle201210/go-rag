@@ -22,7 +22,8 @@ func (c *ControllerV1) Chat(ctx context.Context, req *v1.ChatReq) (res *v1.ChatR
 		return
 	}
 	res = &v1.ChatRes{
-		Answer: answer,
+		Answer:     answer,
+		References: retriever.Document,
 	}
 	return
 }

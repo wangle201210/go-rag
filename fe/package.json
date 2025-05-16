@@ -1,21 +1,26 @@
 {
-  "name": "fe",
+  "name": "go-rag-fe",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.9.0",
-    "markdown-it": "^14.1.0",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.1"
+    "vue": "^3.3.4",
+    "element-plus": "^2.3.8",
+    "axios": "^1.4.0",
+    "vue-router": "^4.2.4",
+    "@element-plus/icons-vue": "^2.1.0",
+    "uuid": "^9.0.0",
+    "marked": "^4.3.0",
+    "highlight.js": "^11.8.0",
+    "dompurify": "^3.0.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.3",
-    "vite": "^6.3.5"
+    "@vitejs/plugin-vue": "^4.2.3",
+    "vite": "^4.4.6",
+    "sass": "^1.64.1"
   }
 }
