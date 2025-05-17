@@ -10,8 +10,8 @@ logger:
 es:
   address: "http://127.0.0.1:9200"
   indexName: "rag-test"
-  username: "elastic"
-  password: "123456"
+#  username: "elastic"
+#  password: "123456"
 
 embedding:
   model: "text-embedding-3-large"
@@ -22,4 +22,4 @@ chat:
   apiKey: "sk-***"
   baseURL: "https://api.openai.com/v1"
   model: "gpt-4o"
-  history: "root:123456@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+  history: "root:123456@tcp(127.0.0.1:3306)/dbname"
