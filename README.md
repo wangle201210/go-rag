@@ -1,5 +1,10 @@
 # go-rag
-基于eino实现知识库的rag
+基于eino+gf+vue实现知识库的rag
+![](./server/static/indexer.png)
+![](./server/static/retriever.png)
+![](./server/static/chat.png)
+
+
 
 ## 存储层
 - [x] es8存储向量相关数据
@@ -9,7 +14,6 @@
 - [x] 网页解析
 - [x] 文档检索
 - [x] 长文档自动切割(chunk)
-- [x] rerank
 - [x] 提供http接口 [rag-api](./server/README.md)
 - [x] 提供 index、retrieve、chat 的前端界面
 - [x] 多知识库支持（通过参数knowledge_name区分）
@@ -19,10 +23,20 @@
 - [ ] 使用mysql存储chunk和文档的映射关系，目前放在es的ext字段
 
 ## 使用
-安装依赖
+### clone项目
 ```bash
-go get github.com/wangle201210/go-rag/server@latest
+git clone https://github.com/wangle201210/go-rag.git
 ```
+### 快速开始
+如果有可用的es8和mysql,可以直接快速启动项目，否则需要先安装es8和mysql  
+需要修改`config.yaml`文件的相关配置
+```bash
+cp server/manifest/config/config.example.yaml server/manifest/config/config.yaml 
+make build
+make run
+````
+### 安装依赖
+*如果有可用的es8和mysql,可以不用安装*  
 安装es8
 ```bash
 docker run -d --name elasticsearch \
@@ -32,13 +46,6 @@ docker run -d --name elasticsearch \
   -p 9200:9200 \
   -p 9300:9300 \
   elasticsearch:8.18.0
-  
-  
-  docker run -d --name elasticsearch \
-   -p 9200:9200 \
-   -p 9300:9300 \
-   -e "discovery.type=single-node" \
-   elasticsearch:8.18.0
 ```
 安装mysql
 ```bash
@@ -49,70 +56,40 @@ docker run -p 3306:3306 --name mysql \
     -e MYSQL_ROOT_PASSWORD=123456 \
     -d mysql:8.0
 ```
-初始化Rag对象
-```go
-    client, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{"http://localhost:9200"},
-	})
-	if err != nil {
-		log.Printf("NewClient of es8 failed, err=%v", err)
-		return
-	}
-	ragSvr, err = New(context.Background(), &config.Config{
-		Client:    client,
-		IndexName: "rag",
-		APIKey:    os.Getenv("OPENAI_API_KEY"),
-		BaseURL:   os.Getenv("OPENAI_BASE_URL"),
-		Model:     "text-embedding-3-large",
-	})
-	if err != nil {
-		log.Printf("New of rag failed, err=%v", err)
-		return
-	}
+
+### 运行 api 项目
+
+```bash
+cd server
+go mod tidy
+go run main.go
 ```
-加载各种数据源的数据，并将其向量化后存储进向量数据库。
-```golang
-func TestIndex(t *testing.T) {
-	ctx := context.Background()
-	uriList := []string{
-		"./test_file/readme.md",
-		"./test_file/readme2.md",
-		"./test_file/readme.html",
-		"./test_file/test.pdf",
-		"https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html",
-	}
-	for _, s := range uriList {
-		req := &IndexReq{
-			URI:           s,
-			KnowledgeName: "wanna",
-		}
-		ids, err := ragSvr.Index(ctx, req)
-		if err != nil {
-			t.Fatal(err)
-		}
-		for _, id := range ids {
-			t.Log(id)
-		}
-	}
-}
+
+### 运行前端项目
+
+```bash
+cd fe
+npm install
+npm run dev
 ```
-检索
-```go
-func TestRetriever(t *testing.T) {
-	ctx := context.Background()
-	req := &RetrieveReq{
-		Query:         "这里有很多内容",
-		TopK:          5,
-		Score:         1.2,
-		KnowledgeName: "wanna",
-	}
-	msg, err := ragSvr.Retrieve(ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, m := range msg {
-		t.Logf("content: %v, score: %v", m.Content, m.Score())
-	}
-}
-```
-详情可以参照[test文件](./server/core/rag_test.go)
+
+## 使用Makefile构建
+
+- 构建前端并将产物复制到server/static/fe目录 `make build-fe`
+
+- 构建后端 `make build-server`
+
+- 构建整个项目（前端+后端）`make build`
+
+- 清理构建产物 `make clean`
+
+## Docker部署
+
+### 构建Docker镜像
+
+- 使用Makefile构建Docker镜像 `make docker-build`
+
+- 或者直接使用docker命令 `docker build -t go-rag:latest .`
+
+### 使用Docker Compose启动
+`docker-compose up -d`

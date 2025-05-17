@@ -18,6 +18,10 @@ build-server:
 # 构建整个项目
 build: build-fe build-server
 
+# 运行
+run:
+	cd server && ./go-rag-server
+
 # 清理构建产物
 clean:
 	rm -rf fe/dist
