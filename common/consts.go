@@ -5,4 +5,5 @@ const (
 	FieldContentVector = "content_vector"
 	FieldExtra         = "ext"
 	DocExtra           = "ext"
+	KnowledgeName      = "_knowledge_name"
 )

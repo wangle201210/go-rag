@@ -9,9 +9,10 @@ import (
 
 func (c *ControllerV1) Chat(ctx context.Context, req *v1.ChatReq) (res *v1.ChatRes, err error) {
 	retriever, err := c.Retriever(ctx, &v1.RetrieverReq{
-		Question: req.Question,
-		TopK:     req.TopK,
-		Score:    req.Score,
+		Question:      req.Question,
+		TopK:          req.TopK,
+		Score:         req.Score,
+		KnowledgeName: req.KnowledgeName,
 	})
 	if err != nil {
 		return
