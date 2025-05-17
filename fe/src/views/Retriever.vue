@@ -88,6 +88,7 @@
 </template>
 
 <script setup>
+import { getKnowledgeName } from '../utils/knowledgeStore'
 import { ref, reactive } from 'vue'
 import { Search, Document } from '@element-plus/icons-vue'
 import axios from 'axios'
@@ -144,7 +145,8 @@ const handleSearch = async () => {
     const response = await axios.post('/v1/retriever', {
       question: searchForm.question,
       top_k: searchForm.top_k,
-      score: searchForm.score
+      score: searchForm.score,
+      knowledge_name: getKnowledgeName()
     })
     searchResults.value = response.data.data.document || []
     

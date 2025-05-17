@@ -58,7 +58,8 @@ $ docker-compose up -d
 curl --request POST \
   --url http://localhost:8000/v1/indexer \
   --header 'content-type: multipart/form-data' \
-  --form 'file=[object Object]'
+  --form 'file=[object Object]' \
+  --form knowledge_name=my_knowledge_name
 ```
 
 ## retriever
@@ -70,7 +71,8 @@ curl --request POST \
   --data '{
     "question":"未来计划",
     "top_k":5,
-    "score":0.2
+    "score":0.2,
+    "knowledge_name": "my_knowledge_name"
 }'
 ```
 
@@ -84,7 +86,8 @@ curl --request POST \
     "question":"未来计划",
     "top_k":5,
     "score":0.2,
-    "conv_id":"123-abc"
+    "conv_id":"123-abc",
+    "knowledge_name": "my_knowledge_name"
 }'
 ```
 conv_id 是会话id，尽量不相关的问题使用不同的会话id，否则上下文过长会导致大模型回答不准确  
