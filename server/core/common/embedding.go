@@ -6,7 +6,7 @@ import (
 
 	"github.com/cloudwego/eino-ext/components/embedding/openai"
 	"github.com/cloudwego/eino/components/embedding"
-	"github.com/wangle201210/go-rag/config"
+	"github.com/wangle201210/go-rag/server/core/config"
 )
 
 func NewEmbedding(ctx context.Context, conf *config.Config) (eb embedding.Embedder, err error) {

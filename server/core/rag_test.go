@@ -1,4 +1,4 @@
-package rag
+package core
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/wangle201210/go-rag/config"
+	"github.com/wangle201210/go-rag/server/core/config"
 )
 
 var ragSvr = &Rag{}

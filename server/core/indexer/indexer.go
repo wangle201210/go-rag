@@ -9,8 +9,8 @@ import (
 	"github.com/cloudwego/eino/components/indexer"
 	"github.com/cloudwego/eino/schema"
 	"github.com/google/uuid"
-	"github.com/wangle201210/go-rag/common"
-	"github.com/wangle201210/go-rag/config"
+	"github.com/wangle201210/go-rag/server/core/common"
+	"github.com/wangle201210/go-rag/server/core/config"
 )
 
 // newIndexer component initialization function of node 'Indexer2' in graph 'rag'

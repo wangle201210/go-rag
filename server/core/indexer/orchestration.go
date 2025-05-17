@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/cloudwego/eino/compose"
-	"github.com/wangle201210/go-rag/config"
+	"github.com/wangle201210/go-rag/server/core/config"
 )
 
 func BuildIndexer(ctx context.Context, conf *config.Config) (r compose.Runnable[any, []string], err error) {

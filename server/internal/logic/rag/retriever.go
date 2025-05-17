@@ -6,11 +6,11 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/wangle201210/go-rag"
-	"github.com/wangle201210/go-rag/config"
+	"github.com/wangle201210/go-rag/server/core"
+	"github.com/wangle201210/go-rag/server/core/config"
 )
 
-var ragSvr = &rag.Rag{}
+var ragSvr = &core.Rag{}
 
 func init() {
 	ctx := context.Background()
@@ -23,7 +23,7 @@ func init() {
 		log.Printf("NewClient of es8 failed, err=%v", err)
 		return
 	}
-	ragSvr, err = rag.New(ctx, &config.Config{
+	ragSvr, err = core.New(ctx, &config.Config{
 		Client:    client,
 		IndexName: g.Cfg().MustGet(ctx, "es.indexName").String(),
 		APIKey:    g.Cfg().MustGet(ctx, "embedding.apiKey").String(),
@@ -36,6 +36,6 @@ func init() {
 	}
 }
 
-func GetRagSvr() *rag.Rag {
+func GetRagSvr() *core.Rag {
 	return ragSvr
 }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
-	"github.com/wangle201210/go-rag/config"
+	"github.com/wangle201210/go-rag/server/core/config"
 )
 
 func BuildRetriever(ctx context.Context, conf *config.Config) (r compose.Runnable[string, []*schema.Document], err error) {

@@ -6,9 +6,9 @@ import (
 	"sort"
 
 	"github.com/gogf/gf/v2/frame/g"
+	gorag "github.com/wangle201210/go-rag/server/core"
 	"github.com/wangle201210/go-rag/server/internal/logic/rag"
 
-	gorag "github.com/wangle201210/go-rag"
 	"github.com/wangle201210/go-rag/server/api/rag/v1"
 )
 
