@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  go-rag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      # 如果需要持久化配置或数据，可以添加相应的卷挂载
+      - ./server/manifest:/app/manifest

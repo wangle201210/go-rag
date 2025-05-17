@@ -29,3 +29,6 @@ server/manifest/config/config.yaml
 /server/uploads/
 /node_modules/
 /fe/package-lock.json
+/server/static/fe/
+/fe/.vite
+/server/go-rag-server

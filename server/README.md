@@ -17,6 +17,40 @@ $ npm install
 $ npm run dev
 ```
 
+## 使用Makefile构建
+
+```bash
+# 构建前端并将产物复制到server/static/fe目录
+$ make build-fe
+
+# 构建后端
+$ make build-server
+
+# 构建整个项目（前端+后端）
+$ make build
+
+# 清理构建产物
+$ make clean
+```
+
+## Docker部署
+
+### 构建Docker镜像
+
+```bash
+# 使用Makefile构建Docker镜像
+$ make docker-build
+
+# 或者直接使用docker命令
+$ docker build -t go-rag:latest .
+```
+
+### 使用Docker Compose启动
+
+```bash
+$ docker-compose up -d
+```
+
 
 ## indexer
 解析文件并向量化到es ![](./static/indexer.png)

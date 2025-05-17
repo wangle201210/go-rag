@@ -1,9 +1,0 @@
-
-/* 统一容器样式 */
-.page-container {
-  /*max-width: var(--container-width);*/
-  margin: 0 auto;
-  padding: 2rem;
-  box-sizing: border-box;
-  max-width: 1000px;
-}
