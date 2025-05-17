@@ -10,8 +10,8 @@ import (
 	"github.com/cloudwego/eino/components/retriever"
 	"github.com/cloudwego/eino/schema"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
-	"github.com/wangle201210/go-rag/common"
-	"github.com/wangle201210/go-rag/config"
+	"github.com/wangle201210/go-rag/server/core/common"
+	"github.com/wangle201210/go-rag/server/core/config"
 )
 
 // newRetriever component initialization function of node 'Retriever1' in graph 'retriever'

@@ -30,3 +30,6 @@ docker-build: build
 
 run-local:
 	cd server && go mod tidy && go run .
+
+build-linux:
+	cd server && go mod tidy && GOOS=linux GOARCH=amd64 go build -o go-rag-server

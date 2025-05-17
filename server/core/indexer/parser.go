@@ -6,7 +6,7 @@ import (
 	"github.com/cloudwego/eino-ext/components/document/parser/html"
 	"github.com/cloudwego/eino-ext/components/document/parser/pdf"
 	"github.com/cloudwego/eino/components/document/parser"
-	"github.com/wangle201210/go-rag/common"
+	"github.com/wangle201210/go-rag/server/core/common"
 )
 
 func newParser(ctx context.Context) (p parser.Parser, err error) {

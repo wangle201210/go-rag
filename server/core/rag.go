@@ -1,4 +1,4 @@
-package rag
+package core
 
 import (
 	"context"
@@ -11,10 +11,10 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
-	"github.com/wangle201210/go-rag/common"
-	"github.com/wangle201210/go-rag/config"
-	"github.com/wangle201210/go-rag/indexer"
-	"github.com/wangle201210/go-rag/retriever"
+	"github.com/wangle201210/go-rag/server/core/common"
+	"github.com/wangle201210/go-rag/server/core/config"
+	"github.com/wangle201210/go-rag/server/core/indexer"
+	"github.com/wangle201210/go-rag/server/core/retriever"
 )
 
 type Rag struct {

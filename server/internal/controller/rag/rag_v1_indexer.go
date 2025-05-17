@@ -3,7 +3,7 @@ package rag
 import (
 	"context"
 
-	gorag "github.com/wangle201210/go-rag"
+	gorag "github.com/wangle201210/go-rag/server/core"
 	"github.com/wangle201210/go-rag/server/internal/logic/rag"
 
 	"github.com/wangle201210/go-rag/server/api/rag/v1"

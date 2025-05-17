@@ -7,7 +7,7 @@ import (
 	"github.com/cloudwego/eino-ext/components/document/loader/url"
 	"github.com/cloudwego/eino/components/document"
 	"github.com/cloudwego/eino/schema"
-	"github.com/wangle201210/go-rag/common"
+	"github.com/wangle201210/go-rag/server/core/common"
 )
 
 // newLoader component initialization function of node 'Loader1' in graph 'rag'

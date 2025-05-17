@@ -2,15 +2,24 @@ module github.com/wangle201210/go-rag/server
 
 go 1.23.1
 
-replace github.com/wangle201210/go-rag => ../
-
 require (
+	github.com/bytedance/sonic v1.13.2
 	github.com/cloudwego/eino v0.3.31
+	github.com/cloudwego/eino-ext/components/document/loader/file v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/document/parser/pdf v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/document/transformer/reranker/score v0.0.0-20250513023651-7b19c6ffbf4a
+	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250512035704-1e06fdfda207
+	github.com/cloudwego/eino-ext/components/retriever/es8 v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/elastic/go-elasticsearch/v8 v8.16.0
 	github.com/gogf/gf/v2 v2.9.0
+	github.com/google/uuid v1.6.0
 	github.com/wangle201210/chat-history v0.0.0-20250402104704-5eec15d5419e
-	github.com/wangle201210/go-rag v0.0.0-20250427112217-768521a35d1f
 )
 
 require (
@@ -18,20 +27,9 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/cloudwego/eino-ext/components/document/loader/file v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/document/parser/pdf v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/document/transformer/reranker/score v0.0.0-20250513023651-7b19c6ffbf4a // indirect
-	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250424061409-ccd60fbc7c1c // indirect
-	github.com/cloudwego/eino-ext/components/retriever/es8 v0.0.0-20250424061409-ccd60fbc7c1c // indirect
 	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250422092704-54e372e1fa3d // indirect
 	github.com/dslipak/pdf v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -45,7 +43,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
 	github.com/go-openapi/swag v0.23.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect

@@ -11,6 +11,9 @@
 - [x] 长文档自动切割(chunk)
 - [x] rerank
 - [x] 提供http接口 [rag-api](./server/README.md)
+- [x] 提供 index、retrieve、chat 的前端界面
+- [x] 多知识库支持（通过参数knowledge_name区分）
+
 
 ## 未来计划
 - [ ] 使用mysql存储chunk和文档的映射关系，目前放在es的ext字段
@@ -18,7 +21,7 @@
 ## 使用
 安装依赖
 ```bash
-go get github.com/wangle201210/go-rag@latest
+go get github.com/wangle201210/go-rag/server@latest
 ```
 安装es8
 ```bash
@@ -112,4 +115,4 @@ func TestRetriever(t *testing.T) {
 	}
 }
 ```
-详情可以参照[test文件](./rag_test.go)
+详情可以参照[test文件](./server/core/rag_test.go)
