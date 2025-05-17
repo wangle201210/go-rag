@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"sort"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag/server/internal/logic/rag"
 
+	gorag "github.com/wangle201210/go-rag"
 	"github.com/wangle201210/go-rag/server/api/rag/v1"
 )
 
@@ -21,7 +23,14 @@ func (c *ControllerV1) Retriever(ctx context.Context, req *v1.RetrieverReq) (res
 	if req.Score < 1.0 {
 		req.Score += 1
 	}
-	msg, err := ragSvr.Retrieve(req.Question, req.Score, req.TopK)
+	ragReq := &gorag.RetrieveReq{
+		Query:         req.Question,
+		TopK:          req.TopK,
+		Score:         req.Score,
+		KnowledgeName: req.KnowledgeName,
+	}
+	g.Log().Infof(ctx, "ragReq: %v", ragReq)
+	msg, err := ragSvr.Retrieve(ctx, ragReq)
 	if err != nil {
 		return
 	}

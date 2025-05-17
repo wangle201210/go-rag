@@ -15,6 +15,7 @@
           :on-success="handleUploadSuccess"
           :on-error="handleUploadError"
           :before-upload="beforeUpload"
+          :data="{ knowledge_name: getKnowledgeName() }"
           :show-file-list="true"
           multiple>
           <el-icon class="el-icon--upload"><Upload /></el-icon>
@@ -60,6 +61,7 @@
 </template>
 
 <script setup>
+import { getKnowledgeName } from '../utils/knowledgeStore'
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 

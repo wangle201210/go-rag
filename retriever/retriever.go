@@ -52,6 +52,8 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 						continue
 					}
 					doc.MetaData[common.DocExtra] = val.(string)
+				case common.KnowledgeName:
+					doc.MetaData[common.KnowledgeName] = val.(string)
 				default:
 					return nil, fmt.Errorf("unexpected field=%s, val=%v", field, val)
 				}

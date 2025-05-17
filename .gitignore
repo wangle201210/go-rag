@@ -32,3 +32,4 @@ server/manifest/config/config.yaml
 /server/static/fe/
 /fe/.vite
 /server/go-rag-server
+/server/logs/

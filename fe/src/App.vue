@@ -28,8 +28,13 @@
       </el-aside>
       <el-container>
         <el-header height="60px">
-          <div class="header-title">
-            <h2>基于检索增强生成的智能问答系统</h2>
+          <div class="header-content">
+            <div class="header-title">
+              <h2>基于检索增强生成的智能问答系统</h2>
+            </div>
+            <div class="header-actions">
+              <KnowledgeNameSetting />
+            </div>
           </div>
         </el-header>
         <el-main>
@@ -47,6 +52,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import KnowledgeNameSetting from './components/KnowledgeNameSetting.vue'
 </script>
 
 <style scoped>
@@ -80,8 +86,19 @@ import { ref } from 'vue'
   border-bottom: 1px solid #eee;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .header-title {
   text-align: center;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
 }
 
 .el-main {

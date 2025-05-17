@@ -189,6 +189,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
+import { getKnowledgeName } from '../utils/knowledgeStore'
 
 const messages = ref([])
 const inputMessage = ref('')
@@ -261,7 +262,8 @@ const sendMessage = async () => {
       question: message,
       top_k: chatSettings.top_k,
       score: chatSettings.score,
-      conv_id: sessionId.value
+      conv_id: sessionId.value,
+      knowledge_name: getKnowledgeName()
     })
     
     // 添加AI回复
@@ -285,7 +287,7 @@ const sendMessage = async () => {
     })
   } finally {
     loading.value = false
-    scrollToBottom()
+    await scrollToBottom()
   }
 }
 
@@ -316,13 +318,16 @@ onMounted(() => {
 
 <style scoped>
 .chat-container {
-  height: calc(100vh - 180px);
+  height: calc(100vh - 140px);
+  max-height: 800px;
+  min-height: 500px;
 }
 
 .chat-card, .references-card {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .card-header {
@@ -348,7 +353,8 @@ onMounted(() => {
   background-color: #f9f9f9;
   border-radius: 4px;
   margin-bottom: 15px;
-  height: calc(100% - 180px);
+  min-height: 300px;
+  max-height: calc(100vh - 350px);
 }
 
 .empty-chat {

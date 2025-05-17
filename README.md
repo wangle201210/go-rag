@@ -69,29 +69,47 @@ docker run -p 3306:3306 --name mysql \
 ```
 加载各种数据源的数据，并将其向量化后存储进向量数据库。
 ```golang
-    ids, err := ragSvr.Index("./test_file/readme.md")
-    if err != nil {
-        t.Fatal(err)
-    }
-    for _, id := range ids {
-        t.Log(id)
-    }
-    ragSvr.Index("./test_file/readme2.md")
-    ragSvr.Index("./test_file/readme.html")
-    ragSvr.Index("./test_file/test.pdf")
-    ragSvr.Index("https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html")
-    ... ...
+func TestIndex(t *testing.T) {
+	ctx := context.Background()
+	uriList := []string{
+		"./test_file/readme.md",
+		"./test_file/readme2.md",
+		"./test_file/readme.html",
+		"./test_file/test.pdf",
+		"https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html",
+	}
+	for _, s := range uriList {
+		req := &IndexReq{
+			URI:           s,
+			KnowledgeName: "wanna",
+		}
+		ids, err := ragSvr.Index(ctx, req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, id := range ids {
+			t.Log(id)
+		}
+	}
+}
 ```
 检索
 ```go
-    msg, err := ragSvr.Retrieve("这里有很多内容", 1.5, 5)
-    if err != nil {
-        t.Fatal(err)
-    }
-    for _, m := range msg {
-        t.Logf("content: %v, score: %v", m.Content, m.Score())
-    }
-    msg, err = ragSvr.Retrieve("代码解析", 1.5, 5)
-    ... ...
+func TestRetriever(t *testing.T) {
+	ctx := context.Background()
+	req := &RetrieveReq{
+		Query:         "这里有很多内容",
+		TopK:          5,
+		Score:         1.2,
+		KnowledgeName: "wanna",
+	}
+	msg, err := ragSvr.Retrieve(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, m := range msg {
+		t.Logf("content: %v, score: %v", m.Content, m.Score())
+	}
+}
 ```
 详情可以参照[test文件](./rag_test.go)

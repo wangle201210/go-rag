@@ -20,9 +20,14 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 		Index:     conf.IndexName,
 		BatchSize: 10,
 		DocumentToFields: func(ctx context.Context, doc *schema.Document) (field2Value map[string]es8.FieldValue, err error) {
-			// if doc.ID == "" {
+			var knowledgeName string
+			if value, ok := ctx.Value(common.KnowledgeName).(string); ok {
+				knowledgeName = value
+			} else {
+				err = fmt.Errorf("必须提供知识库名称")
+				return
+			}
 			doc.ID = uuid.New().String()
-			// }
 			if doc.MetaData != nil {
 				marshal, _ := sonic.Marshal(doc.MetaData)
 				doc.MetaData[common.DocExtra] = string(marshal)
@@ -34,6 +39,9 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 				},
 				common.FieldExtra: {
 					Value: doc.MetaData[common.DocExtra],
+				},
+				common.KnowledgeName: {
+					Value: knowledgeName,
 				},
 			}, nil
 		},

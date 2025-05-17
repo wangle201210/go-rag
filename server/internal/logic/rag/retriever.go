@@ -16,6 +16,8 @@ func init() {
 	ctx := context.Background()
 	client, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{g.Cfg().MustGet(ctx, "es.address").String()},
+		Username:  g.Cfg().MustGet(ctx, "es.username").String(),
+		Password:  g.Cfg().MustGet(ctx, "es.password").String(),
 	})
 	if err != nil {
 		log.Printf("NewClient of es8 failed, err=%v", err)

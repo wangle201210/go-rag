@@ -10,6 +10,8 @@ logger:
 es:
   address: "http://127.0.0.1:9200"
   indexName: "rag-test"
+  username: "elastic"
+  password: "123456"
 
 embedding:
   model: "text-embedding-3-large"
