@@ -7,7 +7,7 @@
         </div>
         <el-menu
           router
-          default-active="/indexer"
+          :default-active="$route.path"
           class="el-menu-vertical"
           background-color="#001529"
           text-color="#fff"
