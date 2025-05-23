@@ -44,7 +44,7 @@
             </div>
             
             <div v-if="loading" class="loading-message">
-              <el-skeleton :rows="3" animated />
+              <el-skeleton :rows="1" animated />
             </div>
           </div>
           
@@ -56,8 +56,7 @@
                 :rows="3"
                 placeholder="请输入您的问题..."
                 :disabled="loading"
-                @keyup.enter.exact="sendMessage"
-                @keyup.ctrl.enter="sendMessage">
+                @keydown="handleKeyDown">
               </el-input>
               <div class="input-actions">
                 <el-tooltip content="高级设置" placement="top">
@@ -135,8 +134,7 @@
               <span>{{ messages.length }}</span>
             </div>
           </div>
-
-
+          
           
           <div class="references-content">
             <el-divider content-position="left">参考文档</el-divider>
@@ -170,150 +168,260 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick, watch } from 'vue'
-import { 
-  ChatDotRound, 
-  ChatRound, 
-  User, 
-  Service, 
-  Document, 
-  Setting, 
-  Position, 
-  Plus, 
-  CopyDocument 
-} from '@element-plus/icons-vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ElMessage, ElNotification } from 'element-plus'
+import { User, Service, ChatDotRound, ChatRound, Plus, Position, Setting, Document, CopyDocument } from '@element-plus/icons-vue'
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import { v4 as uuidv4 } from 'uuid'
 import { marked } from 'marked'
-import DOMPurify from 'dompurify'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
+import { v4 as uuidv4 } from 'uuid'
 import { getKnowledgeName } from '../utils/knowledgeStore'
 
-const messages = ref([])
-const inputMessage = ref('')
-const loading = ref(false)
-const references = ref([])
-const showSettings = ref(false)
-const messagesContainer = ref(null)
-const sessionId = ref(uuidv4())
-
-const chatSettings = reactive({
-  top_k: 5,
-  score: 0.2
-})
-
-// 格式化时间
-const formatTime = (timestamp) => {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString()
-}
-
-// 滚动到底部
-const scrollToBottom = async () => {
-  await nextTick()
-  if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-  }
-}
-
-// 配置Marked和代码高亮
+// 初始化marked配置
 marked.setOptions({
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      return hljs.highlight(code, { language: lang }).value;
-    }
-    return hljs.highlightAuto(code).value;
+  highlight: function (code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
   },
+  langPrefix: 'hljs language-',
+  gfm: true,
   breaks: true
 });
 
-// Markdown渲染函数
-const renderMarkdown = (content) => {
-  if (!content) return '';
-  try {
-    const html = marked(content);
-    return DOMPurify.sanitize(html);
-  } catch (error) {
-    console.error('Markdown渲染错误:', error);
-    return content;
+// 聊天消息列表
+const messages = ref([]);
+// 输入框消息
+const inputMessage = ref('');
+// 加载状态
+const loading = ref(false);
+// 消息容器引用
+const messagesContainer = ref(null);
+// 会话ID
+const sessionId = ref(uuidv4());
+// 参考文档
+const references = ref([]);
+// 显示设置面板
+const showSettings = ref(false);
+// 当前正在流式传输的消息
+const currentStreamingMessage = ref('');
+// 是否正在流式传输中
+const isStreaming = ref(false);
+
+// 聊天设置
+const chatSettings = reactive({
+  top_k: 3,
+  score: 0.5
+});
+
+// 处理键盘事件
+const handleKeyDown = (e) => {
+  // 只有在按下Enter键且没有同时按下Shift键时才发送消息
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); // 阻止默认行为
+    sendMessage();
   }
 };
 
 // 发送消息
 const sendMessage = async () => {
-  const message = inputMessage.value.trim()
-  if (!message || loading.value) return
+  const message = inputMessage.value.trim();
+  if (!message || loading.value) return;
   
   // 添加用户消息
   messages.value.push({
     role: 'user',
     content: message,
-    timestamp: Date.now()
-  })
+    timestamp: new Date()
+  });
   
-  inputMessage.value = ''
-  loading.value = true
-  scrollToBottom()
+  // 清空输入框
+  inputMessage.value = '';
+  
+  // 设置加载状态
+  loading.value = true;
+  currentStreamingMessage.value = '';
+  isStreaming.value = true;
+  
+  // 添加AI消息占位
+  messages.value.push({
+    role: 'assistant',
+    content: '',
+    timestamp: new Date()
+  });
+  
+  // 滚动到底部
+  await nextTick();
+  scrollToBottom();
   
   try {
-    const response = await axios.post('/v1/chat', {
-      question: message,
-      top_k: chatSettings.top_k,
-      score: chatSettings.score,
-      conv_id: sessionId.value,
-      knowledge_name: getKnowledgeName()
-    })
+    // 使用fetch API进行流式请求
+    references.value = [];
+    const response = await fetch('/v1/chat/stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        question: message,
+        top_k: chatSettings.top_k,
+        score: chatSettings.score,
+        conv_id: sessionId.value,
+        knowledge_name: getKnowledgeName()
+      }),
+    });
     
-    // 添加AI回复
-    messages.value.push({
-      role: 'assistant',
-      content: response.data.data.answer || '抱歉，我无法回答这个问题。',
-      timestamp: Date.now()
-    })
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     
-    // 更新参考文档
-    references.value = response.data.data.references || []
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    
+    // 读取流数据
+    while (true) {
+      const { value, done } = await reader.read();
+      
+      if (done) {
+        break;
+      }
+      
+      // 解码数据
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          const data = line.slice(5).trim();
+
+          if (data === '[DONE]') {
+            // 流结束
+            isStreaming.value = false;
+            // 确保最后一次完整渲染
+            messages.value[messages.value.length - 1].content = currentStreamingMessage.value;
+            await nextTick();
+            scrollToBottom();
+            break;
+          }
+
+          try {
+            const parsedData = JSON.parse(data);
+            if (parsedData.content) {
+              currentStreamingMessage.value += parsedData.content;
+              // 更新最后一条消息的内容
+              messages.value[messages.value.length - 1].content = currentStreamingMessage.value;
+              await nextTick();
+              scrollToBottom();
+            }
+          } catch (e) {
+            console.error('解析流数据失败:', e);
+          }
+        }
+
+        if (line.startsWith('documents:')) {
+          const data = line.slice(10).trim();
+
+          try {
+            const parsedData = JSON.parse(data);
+            if (parsedData.document) {
+              references.value.push(...parsedData.document);
+              console.log("references",references.value);
+            }
+          } catch (e) {
+            console.error('解析流数据失败:', e);
+          }
+        }
+      }
+    }
+    
+    // // 获取参考文档
+    // const refsResponse = await axios.post('/api/v1/chat', {
+    //   session_id: sessionId.value,
+    //   query: message,
+    //   top_k: chatSettings.top_k,
+    //   score: chatSettings.score
+    // });
+    //
+    // references.value = refsResponse.data.references || [];
+    
   } catch (error) {
-    console.error('发送消息失败:', error)
-    ElMessage.error('发送消息失败: ' + (error.response?.data?.message || '未知错误'))
+    console.error('发送消息失败:', error);
+    ElNotification({
+      title: '错误',
+      message: '发送消息失败，请稍后重试',
+      type: 'error'
+    });
     
-    // 添加错误消息
-    messages.value.push({
-      role: 'assistant',
-      content: '抱歉，发生了错误，请稍后重试。',
-      timestamp: Date.now()
-    })
+    // 移除最后一条消息（AI回复）
+    if (messages.value.length > 0 && messages.value[messages.value.length - 1].role === 'assistant') {
+      messages.value.pop();
+    }
   } finally {
-    loading.value = false
-    await scrollToBottom()
+    loading.value = false;
   }
-}
+};
 
 // 开始新会话
 const startNewSession = () => {
-  sessionId.value = uuidv4()
-  messages.value = []
-  references.value = []
-  ElMessage.success('已开始新会话')
-}
+  if (messages.value.length > 0) {
+    ElMessage({
+      message: '已开始新的会话',
+      type: 'success'
+    });
+  }
+  
+  messages.value = [];
+  references.value = [];
+  sessionId.value = uuidv4();
+};
 
 // 复制会话ID
 const copySessionId = () => {
   navigator.clipboard.writeText(sessionId.value)
-    .then(() => ElMessage.success('会话ID已复制'))
-    .catch(() => ElMessage.error('复制失败'))
-}
+    .then(() => {
+      ElMessage({
+        message: '会话ID已复制到剪贴板',
+        type: 'success'
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        message: '复制失败，请手动复制',
+        type: 'error'
+      });
+    });
+};
 
-// 监听消息变化，自动滚动到底部
-watch(messages, () => {
-  scrollToBottom()
-}, { deep: true })
+// 格式化时间
+const formatTime = (timestamp) => {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
 
+// 渲染Markdown
+const renderMarkdown = (text) => {
+  if (!text) return '';
+  try {
+    // 尝试渲染markdown
+    return marked(text);
+  } catch (error) {
+    console.error('Markdown渲染错误:', error);
+    // 如果渲染失败，返回原始文本
+    return text;
+  }
+};
+
+// 滚动到底部
+const scrollToBottom = () => {
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  }
+};
+
+// 组件挂载后滚动到底部
 onMounted(() => {
-  scrollToBottom()
-})
+  scrollToBottom();
+});
 </script>
 
 <style scoped>
@@ -392,6 +500,7 @@ onMounted(() => {
   max-width: 70%;
   padding: 10px 15px;
   border-radius: 8px;
+  padding: 12px;
   position: relative;
 }
 
@@ -437,62 +546,62 @@ onMounted(() => {
 }
 
 .settings-panel {
-  margin-top: 15px;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  border: 1px solid #ebeef5;
-  position: absolute;
-  width: calc(100% - 30px);
-  z-index: 10;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-.references-content {
-  flex: 1;
-  overflow-y: auto;
-  height: calc(100% - 100px);
-}
-
-.empty-references {
-  height: calc(100% - 100px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 0;
-}
-
-.reference-content {
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-}
-
-.source-info {
-  margin-bottom: 10px;
-}
-
-.content-text {
-  white-space: pre-wrap;
-  line-height: 1.6;
+  margin-top: 16px;
+  padding: 16px;
+  background-color: var(--el-color-info-light-9);
+  border-radius: 8px;
 }
 
 .session-info {
-  margin-top: auto;
-  padding: 15px 0;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: var(--el-color-info-light-9);
+  border-radius: 8px;
 }
 
 .session-id, .message-count {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+
+.session-id:last-child, .message-count:last-child {
+  margin-bottom: 0;
 }
 
 .label {
   font-weight: bold;
-  margin-right: 10px;
-  color: #606266;
+  margin-right: 8px;
 }
+
+.references-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty-references {
+  padding: 20px;
+  text-align: center;
+}
+
+.reference-list {
+  margin-top: 12px;
+}
+
+.reference-content {
+  padding: 8px;
+}
+
+.source-info {
+  margin-bottom: 8px;
+}
+
+.content-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
 
 /* Markdown 样式 */
 .markdown-content {
@@ -578,5 +687,30 @@ onMounted(() => {
 
 .markdown-content :deep(tr:nth-child(2n)) {
   background-color: #f6f8fa;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid #d0d7de;
+  padding-left: 1em;
+  color: #57606a;
+  margin: 1em 0;
+}
+
+/* 打字效果的光标动画 */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 为最后一条AI消息添加光标效果，但仅在流式传输时显示 */
+.ai-message:last-child .message-text:after {
+  content: '|';
+  display: inline-block;
+  color: var(--el-color-primary);
+  animation: cursor-blink 0.8s infinite;
+  font-weight: bold;
+  margin-left: 2px;
+  /* 仅在流式传输时显示光标 */
+  display: v-bind(isStreaming ? 'inline-block' : 'none');
 }
 </style>
