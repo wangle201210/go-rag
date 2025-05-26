@@ -36,7 +36,7 @@ func init() {
 		g.Log().Fatalf(ctx, "newChat failed, err=%v", err)
 		return
 	}
-	c.eh = eino.NewEinoHistory(g.Cfg().MustGet(ctx, "chat.history").String())
+	c.eh = eino.NewEinoHistory(g.Cfg().MustGet(ctx, "chat.database").String())
 	chat = c
 }
 
