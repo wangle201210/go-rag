@@ -1,120 +1,101 @@
 <template>
-  <div class="app-container">
+  <el-container class="app-wrapper">
+    <el-aside width="200px" class="sidebar">
+      <div class="logo">
+        <h2>Agentic RAG</h2>
+      </div>
+      <el-menu
+        :default-active="route.path"
+        class="el-menu-vertical"
+        router
+      >
+        <el-menu-item index="/knowledge">
+          <el-icon><Document /></el-icon>
+          <span>知识库管理</span>
+        </el-menu-item>
+      </el-menu>
+    </el-aside>
     <el-container>
-      <el-aside width="200px">
-        <div class="logo-container">
-          <h2>Go-RAG</h2>
+      <el-header class="header">
+        <div class="header-left">
+          <el-breadcrumb>
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>{{ route.meta.title }}</el-breadcrumb-item>
+          </el-breadcrumb>
         </div>
-        <el-menu
-          router
-          :default-active="$route.path"
-          class="el-menu-vertical"
-          background-color="#001529"
-          text-color="#fff"
-          active-text-color="#409EFF">
-          <el-menu-item index="/indexer">
-            <el-icon><Upload /></el-icon>
-            <span>文档索引</span>
-          </el-menu-item>
-          <el-menu-item index="/retriever">
-            <el-icon><Search /></el-icon>
-            <span>文档检索</span>
-          </el-menu-item>
-          <el-menu-item index="/chat">
-            <el-icon><ChatDotRound /></el-icon>
-            <span>智能问答</span>
-          </el-menu-item>
-        </el-menu>
-      </el-aside>
-      <el-container>
-        <el-header height="60px">
-          <div class="header-content">
-            <div class="header-title">
-              <h2>基于检索增强生成的智能问答系统</h2>
-            </div>
-            <div class="header-actions">
-              <KnowledgeNameSetting />
-            </div>
-          </div>
-        </el-header>
-        <el-main>
-          <router-view />
-        </el-main>
-        <el-footer height="40px">
-          <div class="footer-content">
-            © 2025 Go-RAG Project
-          </div>
-        </el-footer>
-      </el-container>
+        <div class="header-right">
+          <el-dropdown>
+            <span class="user-info">
+              管理员 <el-icon><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>个人信息</el-dropdown-item>
+                <el-dropdown-item>退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </el-header>
+      <el-main>
+        <router-view />
+      </el-main>
     </el-container>
-  </div>
+  </el-container>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import KnowledgeNameSetting from './components/KnowledgeNameSetting.vue'
+import { useRoute } from 'vue-router'
+import { Document, ArrowDown } from '@element-plus/icons-vue'
+
+const route = useRoute()
 </script>
 
 <style scoped>
-.app-container {
+.app-wrapper {
   height: 100vh;
-  width: 100%;
 }
 
-.el-container {
-  height: 100%;
+.sidebar {
+  background-color: #304156;
+  color: #fff;
 }
 
-.el-aside {
-  background-color: #001529;
-  color: white;
-  height: 100%;
-}
-
-.logo-container {
+.logo {
   height: 60px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  color: #409EFF;
+  border-bottom: 1px solid #1f2d3d;
 }
 
-.el-header {
-  background-color: #fff;
-  color: #333;
-  line-height: 60px;
-  border-bottom: 1px solid #eee;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-title {
-  text-align: center;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-}
-
-.el-main {
-  background-color: #f5f7fa;
-  padding: 20px;
-}
-
-.el-footer {
-  background-color: #fff;
-  color: #666;
-  text-align: center;
-  line-height: 40px;
-  border-top: 1px solid #eee;
+.logo h2 {
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
 }
 
 .el-menu-vertical {
   border-right: none;
+}
+
+.header {
+  background-color: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.el-main {
+  background-color: #f0f2f5;
+  padding: 20px;
 }
 </style>

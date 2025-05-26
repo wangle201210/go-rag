@@ -3,9 +3,11 @@ package cmd
 import (
 	"context"
 
+	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
+	"github.com/wangle201210/go-rag/server/internal/controller/knowledge_base"
 	"github.com/wangle201210/go-rag/server/internal/controller/rag"
 )
 
@@ -22,6 +24,7 @@ var (
 				group.Middleware(ghttp.MiddlewareHandlerResponse, ghttp.MiddlewareCORS)
 				group.Bind(
 					rag.NewV1(),
+					knowledge_base.NewV1(),
 				)
 			})
 			s.Run()

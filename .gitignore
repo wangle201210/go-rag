@@ -33,3 +33,5 @@ server/manifest/config/config.yaml
 /fe/.vite
 /server/go-rag-server
 /server/logs/
+/产品文档.md
+/开发计划.md

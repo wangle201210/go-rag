@@ -1,9 +1,17 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
     path: '/',
-    redirect: '/indexer'
+    redirect: '/knowledge'
+  },
+  {
+    path: '/knowledge',
+    name: 'Knowledge',
+    component: () => import('@/views/knowledge/List.vue'),
+    meta: {
+      title: '知识库管理'
+    }
   },
   {
     path: '/indexer',
@@ -23,8 +31,13 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title || 'Agentic RAG 系统'
+  next()
 })
 
 export default router
