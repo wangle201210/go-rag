@@ -24,11 +24,19 @@ type Rag struct {
 }
 
 func New(ctx context.Context, conf *config.Config) (*Rag, error) {
+	var err error
+	// Init eino devops server
+	// err := devops.Init(ctx)
+	// if err != nil {
+	// 	g.Log().Errorf(ctx, "[eino dev] init failed, err=%v", err)
+	// 	return nil, err
+	// }
+
 	if len(conf.IndexName) == 0 {
 		return nil, fmt.Errorf("indexName is empty")
 	}
 	// 确保es index存在
-	err := common.CreateIndexIfNotExists(ctx, conf.Client, conf.IndexName)
+	err = common.CreateIndexIfNotExists(ctx, conf.Client, conf.IndexName)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +67,7 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 		URI: req.URI,
 	}
 	ctx = context.WithValue(ctx, common.KnowledgeName, req.KnowledgeName)
-	ids, err = x.idxer.Invoke(ctx, s)
+	ids, err = x.idxer.Invoke(ctx, s, indexer.WithCallbacks()...)
 	if err != nil {
 		return
 	}

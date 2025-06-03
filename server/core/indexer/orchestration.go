@@ -7,12 +7,13 @@ import (
 	"github.com/wangle201210/go-rag/server/core/config"
 )
 
+const (
+	Loader1              = "Loader1"
+	Indexer2             = "Indexer2"
+	DocumentTransformer3 = "DocumentTransformer3"
+)
+
 func BuildIndexer(ctx context.Context, conf *config.Config) (r compose.Runnable[any, []string], err error) {
-	const (
-		Loader1              = "Loader1"
-		Indexer2             = "Indexer2"
-		DocumentTransformer3 = "DocumentTransformer3"
-	)
 	g := compose.NewGraph[any, []string]()
 	loader1KeyOfLoader, err := newLoader(ctx)
 	if err != nil {
@@ -38,4 +39,10 @@ func BuildIndexer(ctx context.Context, conf *config.Config) (r compose.Runnable[
 		return nil, err
 	}
 	return r, err
+}
+
+func WithCallbacks() []compose.Option {
+	return []compose.Option{
+		compose.WithCallbacks(GetLoaderCallback()).DesignateNode(Loader1),
+	}
 }

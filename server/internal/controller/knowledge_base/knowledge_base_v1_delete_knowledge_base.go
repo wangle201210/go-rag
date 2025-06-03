@@ -3,9 +3,8 @@ package knowledge_base
 import (
 	"context"
 
-	"github.com/wangle201210/go-rag/server/internal/model"
-
 	"github.com/wangle201210/go-rag/server/api/knowledge_base/v1"
+	"github.com/wangle201210/go-rag/server/core/model"
 )
 
 func (c *ControllerV1) DeleteKnowledgeBase(ctx context.Context, req *v1.DeleteKnowledgeBaseReq) (res *v1.DeleteKnowledgeBaseRes, err error) {

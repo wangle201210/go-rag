@@ -3,17 +3,17 @@ package controller
 import (
 	"context"
 
-	"github.com/wangle201210/go-rag/server/internal/model"
-	"github.com/wangle201210/go-rag/server/internal/service"
+	"github.com/wangle201210/go-rag/server/core/model"
+	"github.com/wangle201210/go-rag/server/core/server"
 )
 
 type KnowledgeBaseController struct {
-	knowledgeBaseService service.IKnowledgeBase
+	knowledgeBaseService server.IKnowledgeBase
 }
 
 func NewKnowledgeBaseController() *KnowledgeBaseController {
 	return &KnowledgeBaseController{
-		knowledgeBaseService: service.NewKnowledgeBase(),
+		knowledgeBaseService: server.NewKnowledgeBase(),
 	}
 }
 

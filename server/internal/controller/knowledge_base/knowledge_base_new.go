@@ -6,15 +6,15 @@ package knowledge_base
 
 import (
 	"github.com/wangle201210/go-rag/server/api/knowledge_base"
-	"github.com/wangle201210/go-rag/server/internal/service"
+	knowledge_base2 "github.com/wangle201210/go-rag/server/core/server"
 )
 
 type ControllerV1 struct {
-	knowledgeBaseService service.IKnowledgeBase
+	knowledgeBaseService knowledge_base2.IKnowledgeBase
 }
 
 func NewV1() knowledge_base.IKnowledgeBaseV1 {
 	return &ControllerV1{
-		knowledgeBaseService: service.NewKnowledgeBase(),
+		knowledgeBaseService: knowledge_base2.NewKnowledgeBase(),
 	}
 }

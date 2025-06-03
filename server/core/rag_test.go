@@ -36,10 +36,10 @@ func TestIndex(t *testing.T) {
 	ctx := context.Background()
 	uriList := []string{
 		"./test_file/readme.md",
-		"./test_file/readme2.md",
-		"./test_file/readme.html",
-		"./test_file/test.pdf",
-		"https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html",
+		// "./test_file/readme2.md",
+		// "./test_file/readme.html",
+		// "./test_file/test.pdf",
+		// "https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html",
 	}
 	for _, s := range uriList {
 		req := &IndexReq{

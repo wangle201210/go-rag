@@ -1,0 +1,10 @@
+---
+description: 
+globs: server/*
+alwaysApply: false
+---
+# 服务端开发时
+- 后端接口使用 https://github.com/gogf/gf 框架
+- ai 底层逻辑使用 https://github.com/cloudwego/eino 框架
+- mysql的操作也要使用gf的curd实现，不要使用gorm
+- api接口前缀为/api/v1

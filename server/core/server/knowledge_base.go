@@ -1,10 +1,10 @@
-package service
+package server
 
 import (
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/wangle201210/go-rag/server/internal/model"
+	"github.com/wangle201210/go-rag/server/core/model"
 )
 
 type IKnowledgeBase interface {
