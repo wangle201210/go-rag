@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/cloudwego/eino-ext/components/retriever/es8"
@@ -10,7 +11,9 @@ import (
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag/server/core/common"
 	"github.com/wangle201210/go-rag/server/core/config"
 	"github.com/wangle201210/go-rag/server/core/indexer"
@@ -41,8 +44,9 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 		return nil, err
 	}
 	return &Rag{
-		idxer: buildIndex,
-		rtrvr: buildRetriever,
+		idxer:  buildIndex,
+		rtrvr:  buildRetriever,
+		client: conf.Client,
 	}, nil
 }
 
@@ -86,6 +90,40 @@ func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 	)
 	if err != nil {
 		return
+	}
+	return
+}
+
+// GetKnowledgeBaseList 获取知识库列表
+func (x *Rag) GetKnowledgeBaseList(ctx context.Context) (list []string, err error) {
+	names := "distinct_knowledge_names"
+	query := search.NewRequest()
+	query.Size = common.Of(0) // 不返回原始文档
+	query.Aggregations = map[string]types.Aggregations{
+		names: {
+			Terms: &types.TermsAggregation{
+				Field: common.Of(common.KnowledgeName),
+				Size:  common.Of(10000),
+			},
+		},
+	}
+	res, err := search.NewSearchFunc(x.client)().
+		Request(query).
+		Do(ctx)
+	if err != nil {
+		return
+	}
+	if res.Aggregations == nil {
+		g.Log().Infof(ctx, "No aggregations found")
+		return
+	}
+	termsAgg, ok := res.Aggregations[names].(*types.StringTermsAggregate)
+	if !ok || termsAgg == nil {
+		err = errors.New("failed to parse terms aggregation")
+		return
+	}
+	for _, bucket := range termsAgg.Buckets.([]types.StringTermsBucket) {
+		list = append(list, bucket.Key.(string))
 	}
 	return
 }

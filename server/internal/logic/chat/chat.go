@@ -25,6 +25,7 @@ func GetChat() *Chat {
 	return chat
 }
 
+// 暂时用不上chat功能，先不init
 func init() {
 	ctx := gctx.New()
 	c, err := newChat(&openai.ChatModelConfig{

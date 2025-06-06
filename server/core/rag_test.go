@@ -12,7 +12,7 @@ import (
 
 var ragSvr = &Rag{}
 
-func init() {
+func _init() {
 	client, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{"http://localhost:9200"},
 	})
@@ -71,4 +71,15 @@ func TestRetriever(t *testing.T) {
 	for _, m := range msg {
 		t.Logf("content: %v, score: %v", m.Content, m.Score())
 	}
+}
+
+func TestRag_GetKnowledgeList(t *testing.T) {
+	ctx := context.Background()
+	_init()
+	list, err := ragSvr.GetKnowledgeList(ctx)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	t.Logf("list: %v", list)
 }
