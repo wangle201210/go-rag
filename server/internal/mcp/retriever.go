@@ -13,7 +13,7 @@ import (
 type RetrieverParam struct {
 	Question      string  `json:"question" description:"用户提问的问题" required:"true"`
 	KnowledgeName string  `json:"knowledge_name" description:"知识库名称，请先通过getKnowledgeBaseList获取列表后判断是否有符合用户提示词的知识库" required:"true"`
-	TopK          int     `json:"top_k" description:"检索结果的数量，默认为5" required:"false"`      // 默认为5
+	TopK          int     `json:"top_k" description:"检索结果的数量，默认为10" required:"false"`     // 默认为5
 	Score         float64 `json:"score"  description:"检索结果的分数阀值，默认为0.2" required:"false"` // 默认为0.2
 }
 

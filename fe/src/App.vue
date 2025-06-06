@@ -12,6 +12,10 @@
           background-color="#001529"
           text-color="#fff"
           active-text-color="#409EFF">
+          <el-menu-item index="/knowledge-base">
+            <el-icon><Folder /></el-icon>
+            <span>知识库管理</span>
+          </el-menu-item>
           <el-menu-item index="/indexer">
             <el-icon><Upload /></el-icon>
             <span>文档索引</span>
@@ -24,10 +28,6 @@
             <el-icon><ChatDotRound /></el-icon>
             <span>智能问答</span>
           </el-menu-item>
-          <el-menu-item index="/knowledge-base">
-            <el-icon><Folder /></el-icon>
-            <span>知识库管理</span>
-          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-container>
@@ -35,9 +35,6 @@
           <div class="header-content">
             <div class="header-title">
               <h2>基于检索增强生成的智能问答系统</h2>
-            </div>
-            <div class="header-actions">
-              <KnowledgeNameSetting />
             </div>
           </div>
         </el-header>
@@ -57,7 +54,6 @@
 <script setup>
 import { ref } from 'vue'
 import { Folder } from '@element-plus/icons-vue'
-import KnowledgeNameSetting from './components/KnowledgeNameSetting.vue'
 </script>
 
 <style scoped>

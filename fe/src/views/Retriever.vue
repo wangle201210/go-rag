@@ -5,6 +5,9 @@
         <div class="card-header">
           <el-icon class="header-icon"><Search /></el-icon>
           <span>文档检索</span>
+          <div class="header-actions">
+            <KnowledgeSelector ref="knowledgeSelectorRef" />
+          </div>
         </div>
       </template>
       
@@ -88,7 +91,6 @@
 </template>
 
 <script setup>
-import { getKnowledgeName } from '../utils/knowledgeStore'
 import { ref, reactive } from 'vue'
 import { Search, Document } from '@element-plus/icons-vue'
 import axios from 'axios'
@@ -97,6 +99,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
+import KnowledgeSelector from '../components/KnowledgeSelector.vue'
 
 // 配置Marked和代码高亮
 marked.setOptions({
@@ -131,6 +134,7 @@ const loading = ref(false)
 const searchResults = ref([])
 const activeNames = ref([0]) // 默认展开第一个结果
 const searched = ref(false)
+const knowledgeSelectorRef = ref(null)
 
 const handleSearch = async () => {
   if (!searchForm.question) {
@@ -146,7 +150,7 @@ const handleSearch = async () => {
       question: searchForm.question,
       top_k: searchForm.top_k,
       score: searchForm.score,
-      knowledge_name: getKnowledgeName()
+      knowledge_name: knowledgeSelectorRef.value?.getSelectedKnowledgeId() || ''
     })
     searchResults.value = response.data.data.document || []
     
@@ -178,6 +182,10 @@ const handleSearch = async () => {
   align-items: center;
   font-size: 16px;
   font-weight: bold;
+}
+
+.header-actions {
+  margin-left: auto;
 }
 
 .header-icon {

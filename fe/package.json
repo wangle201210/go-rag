@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "vue": "^3.3.4",
-    "element-plus": "^2.3.8",
+    "element-plus": "^2.9.11",
     "axios": "^1.4.0",
     "vue-router": "^4.2.4",
     "@element-plus/icons-vue": "^2.1.0",
