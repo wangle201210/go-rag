@@ -24,6 +24,10 @@
             <el-icon><ChatDotRound /></el-icon>
             <span>智能问答</span>
           </el-menu-item>
+          <el-menu-item index="/knowledge-base">
+            <el-icon><Folder /></el-icon>
+            <span>知识库管理</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-container>
@@ -52,6 +56,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { Folder } from '@element-plus/icons-vue'
 import KnowledgeNameSetting from './components/KnowledgeNameSetting.vue'
 </script>
 
@@ -102,19 +107,22 @@ import KnowledgeNameSetting from './components/KnowledgeNameSetting.vue'
 }
 
 .el-main {
-  background-color: #f5f7fa;
   padding: 20px;
+  background-color: #f5f7fa;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
 }
 
 .el-footer {
   background-color: #fff;
-  color: #666;
+  color: #999;
   text-align: center;
   line-height: 40px;
+  font-size: 12px;
   border-top: 1px solid #eee;
 }
 
-.el-menu-vertical {
-  border-right: none;
+.footer-content {
+  text-align: center;
 }
 </style>
