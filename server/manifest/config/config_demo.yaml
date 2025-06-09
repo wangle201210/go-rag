@@ -7,8 +7,17 @@ logger:
   level : "all"
   stdout: true
 
+database:
+  default:
+    host: "mysql" # 地址
+    port: "3306" # 端口
+    user: "root" # 账号
+    pass: "123456" # 密码
+    name: "go-rag" # 数据库名称
+    type: "mysql" # 数据库类型
+
 es:
-  address: "http://127.0.0.1:9200"
+  address: "http://elasticsearch:9200"
   indexName: "rag-test"
 #  username: "elastic"
 #  password: "123456"
@@ -22,4 +31,3 @@ chat:
   apiKey: "sk-***"
   baseURL: "https://api.openai.com/v1"
   model: "gpt-4o"
-  database: "root:123456@tcp(127.0.0.1:3306)/dbname"

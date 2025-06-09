@@ -139,7 +139,7 @@ const kbForm = reactive({
 const rules = {
   name: [
     { required: true, message: '请输入知识库名称', trigger: 'blur' },
-    { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
   ],
   description: [
     { required: true, message: '请输入知识库描述', trigger: 'blur' },

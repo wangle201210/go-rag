@@ -37,3 +37,7 @@ run-local:
 
 build-linux:
 	cd server && go mod tidy && GOOS=linux GOARCH=amd64 go build -o go-rag-server
+
+run-by-docker:
+	docker compose -f docker-compose.yml up -d
+

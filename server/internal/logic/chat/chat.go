@@ -12,6 +12,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/wangle201210/chat-history/eino"
+	"github.com/wangle201210/go-rag/server/internal/dao"
 )
 
 var chat *Chat
@@ -37,7 +38,7 @@ func init() {
 		g.Log().Fatalf(ctx, "newChat failed, err=%v", err)
 		return
 	}
-	c.eh = eino.NewEinoHistory(g.Cfg().MustGet(ctx, "chat.database").String())
+	c.eh = eino.NewEinoHistory(dao.GetDsn())
 	chat = c
 }
 

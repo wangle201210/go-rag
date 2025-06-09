@@ -22,6 +22,8 @@ require (
 	github.com/gogf/gf/v2 v2.9.0
 	github.com/google/uuid v1.6.0
 	github.com/wangle201210/chat-history v0.0.0-20250402104704-5eec15d5419e
+	gorm.io/driver/mysql v1.5.7
+	gorm.io/gorm v1.25.12
 )
 
 require (
@@ -90,6 +92,4 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.5.7 // indirect
-	gorm.io/gorm v1.25.12 // indirect
 )
