@@ -7,14 +7,17 @@
             <div class="card-header">
               <el-icon class="header-icon"><ChatDotRound /></el-icon>
               <span>智能问答</span>
-              <el-button 
-                type="primary" 
-                size="small" 
-                plain 
-                class="new-session-btn"
-                @click="startNewSession">
-                <el-icon><Plus /></el-icon> 新会话
-              </el-button>
+              <div class="header-actions">
+                <KnowledgeSelector ref="knowledgeSelectorRef" class="knowledge-selector" />
+                <el-button 
+                  type="primary" 
+                  size="small" 
+                  plain 
+                  class="new-session-btn"
+                  @click="startNewSession">
+                  <el-icon><Plus /></el-icon> 新会话
+                </el-button>
+              </div>
             </div>
           </template>
           
@@ -176,7 +179,7 @@ import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import { v4 as uuidv4 } from 'uuid'
-import { getKnowledgeName } from '../utils/knowledgeStore'
+import KnowledgeSelector from '../components/KnowledgeSelector.vue'
 
 // 初始化marked配置
 marked.setOptions({
@@ -199,6 +202,8 @@ const loading = ref(false);
 const messagesContainer = ref(null);
 // 会话ID
 const sessionId = ref(uuidv4());
+// 知识库选择器引用
+const knowledgeSelectorRef = ref(null);
 // 参考文档
 const references = ref([]);
 // 显示设置面板
@@ -267,7 +272,7 @@ const sendMessage = async () => {
         top_k: chatSettings.top_k,
         score: chatSettings.score,
         conv_id: sessionId.value,
-        knowledge_name: getKnowledgeName()
+        knowledge_name: knowledgeSelectorRef.value?.getSelectedKnowledgeId() || ''
       }),
     });
     
@@ -450,8 +455,18 @@ onMounted(() => {
   font-size: 18px;
 }
 
-.new-session-btn {
+.header-actions {
+  display: flex;
+  align-items: center;
   margin-left: auto;
+}
+
+.knowledge-selector {
+  margin-right: 10px;
+}
+
+.new-session-btn {
+  margin-left: 5px;
 }
 
 .chat-messages {

@@ -85,11 +85,65 @@ npm run dev
 
 ## Docker部署
 
-### 构建Docker镜像
+### 使用 Docker Compose 快速启动（推荐）
 
-- 使用Makefile构建Docker镜像 `make docker-build`
+1. 克隆项目
+```bash
+git clone https://github.com/wangle201210/go-rag.git
+cd go-rag
+```
 
-- 或者直接使用docker命令 `docker build -t go-rag:latest .`
+2. 配置环境变量（可选）
+如果需要修改默认配置，可以编辑 `docker compose.yml` 文件中的环境变量：
+- MySQL 密码
+- 数据库名称
+- 其他配置项
 
-### 使用Docker Compose启动
-`docker-compose up -d`
+3. 启动服务
+```bash
+docker compose up -d
+```
+
+服务将在以下端口启动：
+- 主应用：http://localhost:8080
+- Elasticsearch：http://localhost:9200
+- MySQL：localhost:3306
+
+4. 查看服务状态
+```bash
+docker compose ps
+```
+
+5. 查看服务日志
+```bash
+docker compose logs -f
+```
+
+6. 停止服务
+```bash
+docker compose down
+```
+
+### 手动构建和运行
+
+1. 构建镜像
+```bash
+docker build -t go-rag:latest .
+```
+
+2. 运行容器
+```bash
+docker run -d \
+  --name go-rag \
+  -p 8000:8000 \
+  -e ES_HOST=elasticsearch \
+  -e ES_PORT=9200 \
+  -e MYSQL_HOST=mysql \
+  -e MYSQL_PORT=3306 \
+  -e MYSQL_USER=root \
+  -e MYSQL_PASSWORD=your_password \
+  -e MYSQL_DATABASE=go_rag \
+  go-rag:latest
+```
+
+注意：使用手动运行方式时，需要确保 Elasticsearch 和 MySQL 服务已经可用，并且网络配置正确。

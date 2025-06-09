@@ -16,7 +16,7 @@ func createIndex(ctx context.Context, client *elasticsearch.Client, indexName st
 			Properties: map[string]types.Property{
 				FieldContent:  types.NewTextProperty(),
 				FieldExtra:    types.NewTextProperty(),
-				KnowledgeName: types.NewTextProperty(),
+				KnowledgeName: types.NewKeywordProperty(),
 				FieldContentVector: &types.DenseVectorProperty{
 					Dims:       Of(1024), // same as embedding dimensions
 					Index:      Of(true),

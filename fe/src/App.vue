@@ -12,6 +12,10 @@
           background-color="#001529"
           text-color="#fff"
           active-text-color="#409EFF">
+          <el-menu-item index="/knowledge-base">
+            <el-icon><Folder /></el-icon>
+            <span>知识库管理</span>
+          </el-menu-item>
           <el-menu-item index="/indexer">
             <el-icon><Upload /></el-icon>
             <span>文档索引</span>
@@ -32,9 +36,6 @@
             <div class="header-title">
               <h2>基于检索增强生成的智能问答系统</h2>
             </div>
-            <div class="header-actions">
-              <KnowledgeNameSetting />
-            </div>
           </div>
         </el-header>
         <el-main>
@@ -52,7 +53,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import KnowledgeNameSetting from './components/KnowledgeNameSetting.vue'
+import { Folder } from '@element-plus/icons-vue'
 </script>
 
 <style scoped>
@@ -102,19 +103,22 @@ import KnowledgeNameSetting from './components/KnowledgeNameSetting.vue'
 }
 
 .el-main {
-  background-color: #f5f7fa;
   padding: 20px;
+  background-color: #f5f7fa;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
 }
 
 .el-footer {
   background-color: #fff;
-  color: #666;
+  color: #999;
   text-align: center;
   line-height: 40px;
+  font-size: 12px;
   border-top: 1px solid #eee;
 }
 
-.el-menu-vertical {
-  border-right: none;
+.footer-content {
+  text-align: center;
 }
 </style>

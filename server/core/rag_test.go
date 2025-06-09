@@ -3,16 +3,17 @@ package core
 import (
 	"context"
 	"log"
-	"os"
 	"testing"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag/server/core/config"
 )
 
 var ragSvr = &Rag{}
 
-func init() {
+func _init() {
+	ctx := context.Background()
 	client, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{"http://localhost:9200"},
 	})
@@ -21,11 +22,12 @@ func init() {
 		return
 	}
 	ragSvr, err = New(context.Background(), &config.Config{
-		Client:    client,
-		IndexName: "rag-test",
-		APIKey:    os.Getenv("OPENAI_API_KEY"),
-		BaseURL:   os.Getenv("OPENAI_BASE_URL"),
-		Model:     "text-embedding-3-large",
+		Client:         client,
+		IndexName:      "rag-test",
+		APIKey:         g.Cfg().MustGet(ctx, "embedding.apiKey").String(),
+		BaseURL:        g.Cfg().MustGet(ctx, "embedding.baseURL").String(),
+		EmbeddingModel: g.Cfg().MustGet(ctx, "embedding.model").String(),
+		ChatModel:      g.Cfg().MustGet(ctx, "chat.model").String(),
 	})
 	if err != nil {
 		log.Printf("New of rag failed, err=%v", err)
@@ -57,12 +59,13 @@ func TestIndex(t *testing.T) {
 }
 
 func TestRetriever(t *testing.T) {
+	_init()
 	ctx := context.Background()
 	req := &RetrieveReq{
-		Query:         "这里有很多内容",
+		Query:         "deepchat支持哪些国家的语言",
 		TopK:          5,
 		Score:         1.2,
-		KnowledgeName: "wanna",
+		KnowledgeName: "deepchat",
 	}
 	msg, err := ragSvr.Retrieve(ctx, req)
 	if err != nil {
@@ -71,4 +74,14 @@ func TestRetriever(t *testing.T) {
 	for _, m := range msg {
 		t.Logf("content: %v, score: %v", m.Content, m.Score())
 	}
+}
+
+func TestRag_GetKnowledgeList(t *testing.T) {
+	ctx := context.Background()
+	list, err := ragSvr.GetKnowledgeBaseList(ctx)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	t.Logf("list: %v", list)
 }

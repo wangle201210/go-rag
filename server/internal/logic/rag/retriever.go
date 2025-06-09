@@ -24,11 +24,12 @@ func init() {
 		return
 	}
 	ragSvr, err = core.New(ctx, &config.Config{
-		Client:    client,
-		IndexName: g.Cfg().MustGet(ctx, "es.indexName").String(),
-		APIKey:    g.Cfg().MustGet(ctx, "embedding.apiKey").String(),
-		BaseURL:   g.Cfg().MustGet(ctx, "embedding.baseURL").String(),
-		Model:     g.Cfg().MustGet(ctx, "embedding.model").String(),
+		Client:         client,
+		IndexName:      g.Cfg().MustGet(ctx, "es.indexName").String(),
+		APIKey:         g.Cfg().MustGet(ctx, "embedding.apiKey").String(),
+		BaseURL:        g.Cfg().MustGet(ctx, "embedding.baseURL").String(),
+		EmbeddingModel: g.Cfg().MustGet(ctx, "embedding.model").String(),
+		ChatModel:      g.Cfg().MustGet(ctx, "chat.model").String(),
 	})
 	if err != nil {
 		log.Printf("New of rag failed, err=%v", err)

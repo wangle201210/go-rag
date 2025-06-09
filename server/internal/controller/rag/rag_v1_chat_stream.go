@@ -84,7 +84,7 @@ func writeSSEData(resp *ghttp.Response, data string) {
 	if len(data) == 0 {
 		return
 	}
-	g.Log().Infof(context.Background(), "data: %s", data)
+	// g.Log().Infof(context.Background(), "data: %s", data)
 	resp.Writeln(fmt.Sprintf("data:%s\n", data))
 	resp.Flush()
 }

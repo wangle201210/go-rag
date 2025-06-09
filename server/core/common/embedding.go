@@ -12,7 +12,7 @@ import (
 func NewEmbedding(ctx context.Context, conf *config.Config) (eb embedding.Embedder, err error) {
 	econf := &openai.EmbeddingConfig{
 		APIKey:     conf.APIKey,
-		Model:      conf.Model,
+		Model:      conf.EmbeddingModel,
 		Dimensions: Of(1024),
 		Timeout:    0,
 		BaseURL:    conf.BaseURL,

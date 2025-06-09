@@ -5,6 +5,9 @@
         <div class="card-header">
           <el-icon class="header-icon"><Upload /></el-icon>
           <span>文档索引</span>
+          <div class="header-actions">
+            <KnowledgeSelector ref="knowledgeSelectorRef" class="knowledge-selector" />
+          </div>
         </div>
       </template>
       <div class="upload-area">
@@ -15,7 +18,7 @@
           :on-success="handleUploadSuccess"
           :on-error="handleUploadError"
           :before-upload="beforeUpload"
-          :data="{ knowledge_name: getKnowledgeName() }"
+          :data="getUpdateData"
           :show-file-list="true"
           multiple>
           <el-icon class="el-icon--upload"><Upload /></el-icon>
@@ -61,20 +64,22 @@
 </template>
 
 <script setup>
-import { getKnowledgeName } from '../utils/knowledgeStore'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import KnowledgeSelector from '../components/KnowledgeSelector.vue'
 
 const processingInfo = ref(null)
 const indexResult = ref(null)
+const knowledgeSelectorRef = ref(null)
 
 const beforeUpload = (file) => {
   // 检查文件类型
-  const allowedTypes = ['application/pdf', 'text/markdown', 'text/html', 'text/plain']
+  // const allowedTypes = ['application/pdf', 'text/markdown', 'text/html', 'text/plain']
+  const allowedTypes = ['text/markdown', 'text/html', 'text/plain']
   const isAllowed = allowedTypes.includes(file.type)
   
   if (!isAllowed) {
-    ElMessage.error('只支持 PDF、Markdown、HTML 和文本文件!')
+    ElMessage.error('只支持 Markdown、HTML 和文本文件!')
     return false
   }
   
@@ -116,6 +121,13 @@ const handleUploadError = (error) => {
   
   ElMessage.error('文档索引失败: ' + (error.message || '未知错误'))
 }
+
+const getUpdateData = () => {
+  return {
+    knowledge_name: knowledgeSelectorRef.value?.getSelectedKnowledgeId() || ''
+  }
+}
+
 </script>
 
 <style scoped>
@@ -133,6 +145,10 @@ const handleUploadError = (error) => {
   align-items: center;
   font-size: 16px;
   font-weight: bold;
+}
+
+.header-actions {
+  margin-left: auto;
 }
 
 .header-icon {
