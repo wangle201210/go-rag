@@ -12,7 +12,9 @@ func BuildIndexer(ctx context.Context, conf *config.Config) (r compose.Runnable[
 		Loader1              = "Loader1"
 		Indexer2             = "Indexer2"
 		DocumentTransformer3 = "DocumentTransformer3"
+		Lambda1              = "Lambda1"
 	)
+
 	g := compose.NewGraph[any, []string]()
 	loader1KeyOfLoader, err := newLoader(ctx)
 	if err != nil {
@@ -28,10 +30,13 @@ func BuildIndexer(ctx context.Context, conf *config.Config) (r compose.Runnable[
 	if err != nil {
 		return nil, err
 	}
+	_ = g.AddLambdaNode(Lambda1, compose.InvokableLambda(newLambda))
+
 	_ = g.AddDocumentTransformerNode(DocumentTransformer3, documentTransformer2KeyOfDocumentTransformer)
 	_ = g.AddEdge(compose.START, Loader1)
 	_ = g.AddEdge(Loader1, DocumentTransformer3)
-	_ = g.AddEdge(DocumentTransformer3, Indexer2)
+	_ = g.AddEdge(DocumentTransformer3, Lambda1)
+	_ = g.AddEdge(Lambda1, Indexer2)
 	_ = g.AddEdge(Indexer2, compose.END)
 	r, err = g.Compile(ctx, compose.WithGraphName("indexer"))
 	if err != nil {

@@ -7,14 +7,14 @@ require (
 	github.com/bytedance/sonic v1.13.2
 	github.com/cloudwego/eino v0.3.31
 	github.com/cloudwego/eino-ext/components/document/loader/file v0.0.0-20250424061409-ccd60fbc7c1c
-	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250605072634-0f875e04269d
 	github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/document/parser/pdf v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/document/transformer/reranker/score v0.0.0-20250513023651-7b19c6ffbf4a
-	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250605072634-0f875e04269d
 	github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20250424061409-ccd60fbc7c1c
-	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250605072634-0f875e04269d
 	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250512035704-1e06fdfda207
 	github.com/cloudwego/eino-ext/components/retriever/es8 v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/elastic/go-elasticsearch/v8 v8.16.0

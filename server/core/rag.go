@@ -7,6 +7,7 @@ import (
 
 	"github.com/cloudwego/eino-ext/components/retriever/es8"
 	"github.com/cloudwego/eino/components/document"
+	"github.com/cloudwego/eino/components/model"
 	er "github.com/cloudwego/eino/components/retriever"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
@@ -16,6 +17,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag/server/core/common"
 	"github.com/wangle201210/go-rag/server/core/config"
+	"github.com/wangle201210/go-rag/server/core/grader"
 	"github.com/wangle201210/go-rag/server/core/indexer"
 	"github.com/wangle201210/go-rag/server/core/retriever"
 )
@@ -24,6 +26,8 @@ type Rag struct {
 	idxer  compose.Runnable[any, []string]
 	rtrvr  compose.Runnable[string, []*schema.Document]
 	client *elasticsearch.Client
+	cm     model.BaseChatModel
+	grader *grader.Grader
 }
 
 func New(ctx context.Context, conf *config.Config) (*Rag, error) {
@@ -43,10 +47,17 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 	if err != nil {
 		return nil, err
 	}
+	cm, err := common.GetChatModel(ctx, conf.GetChatModelConfig())
+	if err != nil {
+		g.Log().Error(ctx, "GetChatModel failed, err=%v", err)
+		return nil, err
+	}
 	return &Rag{
 		idxer:  buildIndex,
 		rtrvr:  buildRetriever,
 		client: conf.Client,
+		cm:     cm,
+		grader: grader.NewGrader(cm),
 	}, nil
 }
 
@@ -75,11 +86,50 @@ type RetrieveReq struct {
 	TopK          int     // 检索结果数量
 	Score         float64 //  分数阀值(0-2, 0 完全相反，1 毫不相干，2 完全相同,一般需要传入一个大于1的数字，如1.5)
 	KnowledgeName string  // 知识库名字
+	optQuery      string  // 优化后的检索关键词
 }
 
 // Retrieve 检索
 func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Document, err error) {
-	msg, err = x.rtrvr.Invoke(ctx, req.Query,
+	used := ""
+	// 最多尝试5次
+	for i := 0; i < 5; i++ {
+		question := req.Query
+		var (
+			messages []*schema.Message
+			generate *schema.Message
+			docs     []*schema.Document
+			pass     bool
+		)
+		messages, err = getMessages(used, question)
+		if err != nil {
+			return
+		}
+		generate, err = x.cm.Generate(ctx, messages)
+		if err != nil {
+			return
+		}
+		optimizedQuery := generate.Content
+		used += optimizedQuery + " "
+		req.optQuery = optimizedQuery
+		docs, err = x.retrieve(ctx, req)
+		if err != nil {
+			return
+		}
+		pass, err = x.grader.Retriever(ctx, docs, req.Query)
+		if err != nil {
+			return
+		}
+		if pass {
+			return docs, nil
+		}
+	}
+	return
+}
+
+func (x *Rag) retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Document, err error) {
+	g.Log().Infof(ctx, "query: %v", req.optQuery)
+	msg, err = x.rtrvr.Invoke(ctx, req.optQuery,
 		compose.WithRetrieverOption(
 			er.WithScoreThreshold(req.Score),
 			er.WithTopK(req.TopK),

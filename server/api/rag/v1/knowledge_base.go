@@ -30,7 +30,7 @@ type KBUpdateReq struct {
 	Name        *string `v:"length:3,10" dc:"kb name"`
 	Description *string `v:"length:3,200" dc:"kb description"`
 	Category    *string `v:"length:3,10" dc:"kb category"`
-	Status      *Status `v:"in:0,1" dc:"kb status"`
+	Status      *Status `v:"in:1,2" dc:"kb status"`
 }
 type KBUpdateRes struct{}
 
@@ -51,7 +51,7 @@ type KBGetOneRes struct {
 type KBGetListReq struct {
 	g.Meta   `path:"/v1/kb" method:"get" tags:"kb" summary:"Get kbs"`
 	Name     *string `v:"length:3,10" dc:"kb name"`
-	Status   *Status `v:"in:0,1" dc:"kb age"`
+	Status   *Status `v:"in:1,2" dc:"kb age"`
 	Category *string `v:"length:3,10" dc:"kb category"`
 }
 

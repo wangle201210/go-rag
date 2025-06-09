@@ -7,7 +7,7 @@ import (
 	"github.com/ThinkInAIXYZ/go-mcp/protocol"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/wangle201210/go-rag/server/internal/logic/rag"
+	v1 "github.com/wangle201210/go-rag/server/api/rag/v1"
 )
 
 type KnowledgeBaseParam struct {
@@ -23,11 +23,17 @@ func GetKnowledgeBaseTool() *protocol.Tool {
 }
 
 func HandleKnowledgeBase(ctx context.Context, toolReq *protocol.CallToolRequest) (res *protocol.CallToolResult, err error) {
-	svr := rag.GetRagSvr()
-	list, err := svr.GetKnowledgeBaseList(ctx)
+	statusOK := v1.StatusOK
+	getList, err := c.KBGetList(ctx, &v1.KBGetListReq{
+		Status: &statusOK,
+	})
+	if err != nil {
+		return nil, err
+	}
+	list := getList.List
 	msg := fmt.Sprintf("get %d knowledgeBase", len(list))
-	for i, name := range list {
-		msg += fmt.Sprintf("\n%d. %s", i+1, name)
+	for _, l := range list {
+		msg += fmt.Sprintf("\n - name: %s, description: %s", l.Name, l.Description)
 	}
 	return &protocol.CallToolResult{
 		Content: []protocol.Content{
