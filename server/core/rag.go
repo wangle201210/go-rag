@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/cloudwego/eino-ext/components/retriever/es8"
 	"github.com/cloudwego/eino/components/document"
@@ -82,18 +83,21 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 }
 
 type RetrieveReq struct {
-	Query         string  // 检索关键词
-	TopK          int     // 检索结果数量
-	Score         float64 //  分数阀值(0-2, 0 完全相反，1 毫不相干，2 完全相同,一般需要传入一个大于1的数字，如1.5)
-	KnowledgeName string  // 知识库名字
-	optQuery      string  // 优化后的检索关键词
+	Query         string   // 检索关键词
+	TopK          int      // 检索结果数量
+	Score         float64  //  分数阀值(0-2, 0 完全相反，1 毫不相干，2 完全相同,一般需要传入一个大于1的数字，如1.5)
+	KnowledgeName string   // 知识库名字
+	optQuery      string   // 优化后的检索关键词
+	excludeIDs    []string // 要排除的 _id 列表
 }
 
 // Retrieve 检索
 func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Document, err error) {
 	used := ""
-	// 最多尝试5次
-	for i := 0; i < 5; i++ {
+	relatedDocs := &sync.Map{}
+	docNum := 0
+	// 最多尝试N次,后续做成可配置
+	for i := 0; i < 3; i++ {
 		question := req.Query
 		var (
 			messages []*schema.Message
@@ -101,7 +105,7 @@ func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 			docs     []*schema.Document
 			pass     bool
 		)
-		messages, err = getMessages(used, question)
+		messages, err = getOptimizedQueryMessages(used, question)
 		if err != nil {
 			return
 		}
@@ -116,26 +120,76 @@ func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 		if err != nil {
 			return
 		}
-		pass, err = x.grader.Retriever(ctx, docs, req.Query)
+		wg := &sync.WaitGroup{}
+		for _, doc := range docs {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				pass, err = x.grader.Related(ctx, doc, req.Query)
+				if err != nil {
+					return
+				}
+				req.excludeIDs = append(req.excludeIDs, doc.ID) // 后续不要检索这个_id对应的数据
+				if pass {
+					relatedDocs.Store(doc.ID, doc)
+					docNum++
+				} else {
+					g.Log().Infof(ctx, "not doc score: %v, related: %v", doc.Score(), doc.Content)
+				}
+			}()
+		}
+		wg.Wait()
+		// 数量不够就再次检索
+		if docNum < req.TopK {
+			continue
+		}
+		// 数量够了，就直接返回
+		rDocs := make([]*schema.Document, 0, req.TopK)
+		relatedDocs.Range(func(key, value any) bool {
+			rDocs = append(rDocs, value.(*schema.Document))
+			return true
+		})
+		pass, err = x.grader.Retriever(ctx, rDocs, req.Query)
 		if err != nil {
 			return
 		}
 		if pass {
-			return docs, nil
+			return rDocs, nil
 		}
 	}
+	// 最后数量不够，就返回所有数据
+	relatedDocs.Range(func(key, value any) bool {
+		msg = append(msg, value.(*schema.Document))
+		return true
+	})
 	return
 }
 
 func (x *Rag) retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Document, err error) {
 	g.Log().Infof(ctx, "query: %v", req.optQuery)
+	esQuery := []types.Query{
+		{
+			Bool: &types.BoolQuery{
+				Must: []types.Query{{Match: map[string]types.MatchQuery{common.KnowledgeName: {Query: req.KnowledgeName}}}},
+			},
+		},
+	}
+	if len(req.excludeIDs) > 0 {
+		esQuery[0].Bool.MustNot = []types.Query{
+			{
+				Terms: &types.TermsQuery{
+					TermsQuery: map[string]types.TermsQueryField{
+						"_id": req.excludeIDs,
+					},
+				},
+			},
+		}
+	}
 	msg, err = x.rtrvr.Invoke(ctx, req.optQuery,
 		compose.WithRetrieverOption(
 			er.WithScoreThreshold(req.Score),
 			er.WithTopK(req.TopK),
-			es8.WithFilters([]types.Query{
-				{Match: map[string]types.MatchQuery{common.KnowledgeName: {Query: req.KnowledgeName}}},
-			}),
+			es8.WithFilters(esQuery),
 		),
 	)
 	if err != nil {

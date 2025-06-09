@@ -42,7 +42,7 @@ func formatMessages(template prompt.ChatTemplate, data map[string]any) ([]*schem
 	return messages, nil
 }
 
-func getMessages(used string, question string) ([]*schema.Message, error) {
+func getOptimizedQueryMessages(used string, question string) ([]*schema.Message, error) {
 	template := createTemplate()
 	data := map[string]any{
 		"system":   system,
