@@ -15,7 +15,7 @@ const (
 
 type KBCreateReq struct {
 	g.Meta      `path:"/v1/kb" method:"post" tags:"kb" summary:"Create kb"`
-	Name        string `v:"required|length:3,10" dc:"kb name"`
+	Name        string `v:"required|length:3,20" dc:"kb name"`
 	Description string `v:"required|length:3,200" dc:"kb description"`
 	Category    string `v:"length:3,10" dc:"kb category"`
 }
