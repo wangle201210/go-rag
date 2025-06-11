@@ -65,7 +65,7 @@ func TestRetriever(t *testing.T) {
 		Query:         "deepchat支持哪些国家的语言",
 		TopK:          5,
 		Score:         1.2,
-		KnowledgeName: "deepchat",
+		KnowledgeName: "deepchat使用文档",
 	}
 	msg, err := ragSvr.Retrieve(ctx, req)
 	if err != nil {
