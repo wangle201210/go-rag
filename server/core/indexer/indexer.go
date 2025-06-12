@@ -34,14 +34,18 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 			}
 			return map[string]es8.FieldValue{
 				common.FieldContent: {
-					Value:    getMdContentWithTitle(doc),
-					EmbedKey: common.FieldContentVector, // vectorize doc content and save vector to field "content_vector"
+					Value:    doc.Content,
+					EmbedKey: common.FieldContentVector,
 				},
 				common.FieldExtra: {
 					Value: doc.MetaData[common.DocExtra],
 				},
 				common.KnowledgeName: {
 					Value: knowledgeName,
+				},
+				common.FieldQAContent: {
+					Value:    doc.MetaData[common.FieldQAContent],
+					EmbedKey: common.FieldQAContentVector,
 				},
 			}, nil
 		},

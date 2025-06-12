@@ -10,7 +10,7 @@ import (
 // KnowledgeBase
 // 仅供gorm自动创建表使用
 type KnowledgeBase struct {
-	Id          int64     `gorm:"primaryKey;column:id"`
+	ID          int64     `gorm:"primaryKey;column:id"`
 	Name        string    `gorm:"column:name;type:varchar(255)"`
 	Description string    `gorm:"column:description;type:varchar(255)"`
 	Category    string    `gorm:"column:category;type:varchar(255)"`

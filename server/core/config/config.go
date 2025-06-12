@@ -16,9 +16,24 @@ type Config struct {
 }
 
 func (x *Config) GetChatModelConfig() *openai.ChatModelConfig {
+	if x == nil {
+		return nil
+	}
 	return &openai.ChatModelConfig{
 		APIKey:  x.APIKey,
 		BaseURL: x.BaseURL,
 		Model:   x.ChatModel,
+	}
+}
+
+func (x *Config) Copy() *Config {
+	return &Config{
+		Client:    x.Client,
+		IndexName: x.IndexName,
+		// embedding 时使用
+		APIKey:         x.APIKey,
+		BaseURL:        x.BaseURL,
+		EmbeddingModel: x.EmbeddingModel,
+		ChatModel:      x.ChatModel,
 	}
 }

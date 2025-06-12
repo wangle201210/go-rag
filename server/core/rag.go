@@ -25,15 +25,16 @@ import (
 
 const (
 	scoreThreshold = 1.05 // 设置一个很小的阈值
-	esTopK         = 100
+	esTopK         = 10
 )
 
 type Rag struct {
-	idxer  compose.Runnable[any, []string]
-	rtrvr  compose.Runnable[string, []*schema.Document]
-	client *elasticsearch.Client
-	cm     model.BaseChatModel
-	grader *grader.Grader
+	idxer   compose.Runnable[any, []string]
+	rtrvr   compose.Runnable[string, []*schema.Document]
+	qaRtrvr compose.Runnable[string, []*schema.Document]
+	client  *elasticsearch.Client
+	cm      model.BaseChatModel
+	grader  *grader.Grader
 }
 
 func New(ctx context.Context, conf *config.Config) (*Rag, error) {
@@ -53,17 +54,28 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 	if err != nil {
 		return nil, err
 	}
+	QActx := context.WithValue(ctx, common.RetrieverFieldKey, common.FieldQAContentVector)
+	qaRetriever, err := retriever.BuildRetriever(QActx, conf)
+	if err != nil {
+		return nil, err
+	}
 	cm, err := common.GetChatModel(ctx, conf.GetChatModelConfig())
 	if err != nil {
 		g.Log().Error(ctx, "GetChatModel failed, err=%v", err)
 		return nil, err
 	}
+	// err = indexer.InitQaIndexer(ctx, conf)
+	// if err != nil {
+	// 	g.Log().Error(ctx, "InitQaIndexer failed, err=%v", err)
+	// 	return nil, err
+	// }
 	return &Rag{
-		idxer:  buildIndex,
-		rtrvr:  buildRetriever,
-		client: conf.Client,
-		cm:     cm,
-		grader: grader.NewGrader(cm),
+		idxer:   buildIndex,
+		rtrvr:   buildRetriever,
+		qaRtrvr: qaRetriever,
+		client:  conf.Client,
+		cm:      cm,
+		grader:  grader.NewGrader(cm),
 	}, nil
 }
 
@@ -116,6 +128,7 @@ func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 			messages []*schema.Message
 			generate *schema.Message
 			docs     []*schema.Document
+			qaDocs   []*schema.Document
 			pass     bool
 		)
 		messages, err = getOptimizedQueryMessages(used, question, req.KnowledgeName)
@@ -129,10 +142,15 @@ func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 		optimizedQuery := generate.Content
 		used += optimizedQuery + " "
 		req.optQuery = optimizedQuery
-		docs, err = x.retrieve(ctx, req)
+		docs, err = x.retrieve(ctx, req, false)
 		if err != nil {
 			return
 		}
+		qaDocs, err = x.retrieve(ctx, req, true)
+		if err != nil {
+			return
+		}
+		docs = append(docs, qaDocs...)
 		docs, err = retriever.NewRerank(ctx, req.optQuery, docs, req.TopK)
 		if err != nil {
 			return
@@ -146,6 +164,7 @@ func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
+				// 检查下检索到的结果是否和用户问题相关
 				pass, err = x.grader.Related(ctx, doc, req.Query)
 				if err != nil {
 					return
@@ -186,7 +205,7 @@ func (x *Rag) Retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 	return
 }
 
-func (x *Rag) retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Document, err error) {
+func (x *Rag) retrieve(ctx context.Context, req *RetrieveReq, qa bool) (msg []*schema.Document, err error) {
 	g.Log().Infof(ctx, "query: %v", req.optQuery)
 	esQuery := []types.Query{
 		{
@@ -206,7 +225,11 @@ func (x *Rag) retrieve(ctx context.Context, req *RetrieveReq) (msg []*schema.Doc
 			},
 		}
 	}
-	msg, err = x.rtrvr.Invoke(ctx, req.optQuery,
+	r := x.rtrvr
+	if qa {
+		r = x.qaRtrvr
+	}
+	msg, err = r.Invoke(ctx, req.optQuery,
 		compose.WithRetrieverOption(
 			// er.WithScoreThreshold(req.Score),
 			er.WithTopK(esTopK),

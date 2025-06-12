@@ -16,13 +16,17 @@ import (
 
 // newRetriever component initialization function of node 'Retriever1' in graph 'retriever'
 func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retriever, err error) {
+	vectorField := common.FieldContentVector
+	if value, ok := ctx.Value(common.RetrieverFieldKey).(string); ok {
+		vectorField = value
+	}
 	retrieverConfig := &es8.RetrieverConfig{
 		Client: conf.Client,
 		Index:  conf.IndexName,
 		TopK:   5,
 		SearchMode: search_mode.SearchModeDenseVectorSimilarity(
 			search_mode.DenseVectorSimilarityTypeCosineSimilarity,
-			common.FieldContentVector,
+			vectorField,
 		),
 		ResultParser: func(ctx context.Context, hit types.Hit) (doc *schema.Document, err error) {
 			doc = &schema.Document{
@@ -46,6 +50,8 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 						v = append(v, item.(float64))
 					}
 					doc.WithDenseVector(v)
+				case common.FieldQAContentVector, common.FieldQAContent:
+					// 这两个字段都不返回
 
 				case common.FieldExtra:
 					if val == nil {
