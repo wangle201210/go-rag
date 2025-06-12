@@ -188,7 +188,7 @@ func newQAIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer
 }
 
 func getQAContent(ctx context.Context, conf *config.Config, doc *schema.Document, knowledgeName string) (qaContent string, err error) {
-	cm, err := common.GetNotThinkChatModel(ctx, nil)
+	cm, err := common.GetQAModel(ctx, nil)
 	if err != nil {
 		return
 	}
