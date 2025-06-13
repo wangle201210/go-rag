@@ -2,7 +2,7 @@ version: '3'
 
 services:
   go-rag:
-    image: iwangle/go-rag:v0.0.3
+    image: iwangle/go-rag:v0.0.4
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
@@ -20,7 +20,7 @@ services:
       - MYSQL_DATABASE=go-rag
     volumes:
       # 如果需要持久化配置或数据，可以添加相应的卷挂载，目前是在构建镜像时就copy过去的
-      - ./server/manifest:/app/manifest
+      - ./server/manifest/config/config-docker.yaml:/app/manifest/config/config.yaml
     depends_on:
       - elasticsearch
       - mysql
@@ -31,6 +31,9 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "cluster.routing.allocation.disk.watermark.low=1gb"     # 低于 1GB 停止分配
+      - "cluster.routing.allocation.disk.watermark.high=1gb"    # 低于 1GB 迁移分片
+      - "cluster.routing.allocation.disk.watermark.flood_stage=1gb"  # 低于 1GB 设为只读
     ports:
       - "9200:9200"
     volumes:

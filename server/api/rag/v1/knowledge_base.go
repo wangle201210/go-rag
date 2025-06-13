@@ -15,9 +15,9 @@ const (
 
 type KBCreateReq struct {
 	g.Meta      `path:"/v1/kb" method:"post" tags:"kb" summary:"Create kb"`
-	Name        string `v:"required|length:3,20" dc:"kb name"`
+	Name        string `v:"required|length:3,50" dc:"kb name"`
 	Description string `v:"required|length:3,200" dc:"kb description"`
-	Category    string `v:"length:3,10" dc:"kb category"`
+	Category    string `v:"length:3,50" dc:"kb category"`
 }
 
 type KBCreateRes struct {
@@ -27,9 +27,9 @@ type KBCreateRes struct {
 type KBUpdateReq struct {
 	g.Meta      `path:"/v1/kb/{id}" method:"put" tags:"kb" summary:"Update kb"`
 	Id          int64   `v:"required" dc:"kb id"`
-	Name        *string `v:"length:3,10" dc:"kb name"`
+	Name        *string `v:"length:3,50" dc:"kb name"`
 	Description *string `v:"length:3,200" dc:"kb description"`
-	Category    *string `v:"length:3,10" dc:"kb category"`
+	Category    *string `v:"length:3,50" dc:"kb category"`
 	Status      *Status `v:"in:1,2" dc:"kb status"`
 }
 type KBUpdateRes struct{}
@@ -50,9 +50,9 @@ type KBGetOneRes struct {
 
 type KBGetListReq struct {
 	g.Meta   `path:"/v1/kb" method:"get" tags:"kb" summary:"Get kbs"`
-	Name     *string `v:"length:3,10" dc:"kb name"`
+	Name     *string `v:"length:3,50" dc:"kb name"`
 	Status   *Status `v:"in:1,2" dc:"kb age"`
-	Category *string `v:"length:3,10" dc:"kb category"`
+	Category *string `v:"length:3,50" dc:"kb category"`
 }
 
 type KBGetListRes struct {
