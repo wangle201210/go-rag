@@ -18,7 +18,7 @@ ENV TZ=Asia/Shanghai
 # 复制后端构建产物
 COPY --from=server-builder /app/server/go-rag-server /app/
 COPY --from=server-builder /app/server/static/ /app/static/
-COPY --from=server-builder /app/server/manifest/ /app/manifest/
+COPY --from=server-builder /app/server/manifest/config/config_demo.yaml /app/manifest/config/config.yaml
 
 # 暴露端口
 EXPOSE 8000
