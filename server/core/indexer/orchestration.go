@@ -9,9 +9,9 @@ import (
 
 func BuildIndexer(ctx context.Context, conf *config.Config) (r compose.Runnable[any, []string], err error) {
 	const (
-		Loader1              = "Loader1"
-		Indexer2             = "Indexer2"
-		DocumentTransformer3 = "DocumentTransformer3"
+		Loader1              = "Loader"
+		Indexer2             = "Indexer"
+		DocumentTransformer3 = "DocumentTransformer"
 		DocAddIDAndMerge     = "DocAddIDAndMerge"
 		QA                   = "QA"
 	)

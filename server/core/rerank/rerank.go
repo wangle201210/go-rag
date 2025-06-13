@@ -43,6 +43,14 @@ type Resp struct {
 
 var rerankCfg *Conf
 
+func NewRerank(ctx context.Context, query string, docs []*schema.Document, topK int) (output []*schema.Document, err error) {
+	output, err = rerank(ctx, query, docs, topK)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func GetConf(ctx context.Context) *Conf {
 	if rerankCfg != nil {
 		return rerankCfg
@@ -62,7 +70,7 @@ func GetConf(ctx context.Context) *Conf {
 	return rerankCfg
 }
 
-func Rerank(ctx context.Context, query string, docs []*schema.Document, topK int) (output []*schema.Document, err error) {
+func rerank(ctx context.Context, query string, docs []*schema.Document, topK int) (output []*schema.Document, err error) {
 	data := &Data{
 		Query: query,
 		TopN:  topK,

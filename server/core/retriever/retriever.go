@@ -2,9 +2,9 @@ package retriever
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
+	"github.com/bytedance/sonic"
 	"github.com/cloudwego/eino-ext/components/retriever/es8"
 	"github.com/cloudwego/eino-ext/components/retriever/es8/search_mode"
 	"github.com/cloudwego/eino/components/retriever"
@@ -23,7 +23,6 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 	retrieverConfig := &es8.RetrieverConfig{
 		Client: conf.Client,
 		Index:  conf.IndexName,
-		TopK:   5,
 		SearchMode: search_mode.SearchModeDenseVectorSimilarity(
 			search_mode.DenseVectorSimilarityTypeCosineSimilarity,
 			vectorField,
@@ -31,12 +30,11 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 		ResultParser: func(ctx context.Context, hit types.Hit) (doc *schema.Document, err error) {
 			doc = &schema.Document{
 				ID:       *hit.Id_,
-				Content:  "",
 				MetaData: map[string]any{},
 			}
 
 			var src map[string]any
-			if err = json.Unmarshal(hit.Source_, &src); err != nil {
+			if err = sonic.Unmarshal(hit.Source_, &src); err != nil {
 				return nil, err
 			}
 
