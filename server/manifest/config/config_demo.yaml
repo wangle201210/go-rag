@@ -23,21 +23,26 @@ es:
 #  password: "123456"
 
 embedding:
-  model: "text-embedding-3-large"
-  apiKey: "sk-***"
-  baseURL: "https://api.openai.com/v1"
+  apiKey: "sk-****"
+  baseURL: "https://api.siliconflow.cn/v1"
+  model: "BAAI/bge-m3"
 
 rerank:
-  model: "BAAI/bge-reranker-v2-m3"
-  apiKey: "sk-***"
+  apiKey: "sk-****"
   baseURL: "https://api.siliconflow.cn/v1"
+  model: "BAAI/bge-reranker-v2-m3"
+
+rewrite:
+  apiKey: "sk-****"
+  baseURL: "https://api.siliconflow.cn/v1"
+  model: "Qwen/Qwen3-14B" # 测试下来14b速度最快
 
 qa:
-  model: "Qwen/Qwen3-32B"
-  apiKey: "sk-***"
+  apiKey: "sk-****"
   baseURL: "https://api.siliconflow.cn/v1"
+  model: "Qwen/Qwen3-14B" # 测试下来14b速度最快
 
 chat:
-  apiKey: "sk-***"
-  baseURL: "https://api.openai.com/v1"
-  model: "gpt-4o"
+  apiKey: "sk-****"
+  baseURL: "https://api.siliconflow.cn/v1"
+  model: "Pro/deepseek-ai/DeepSeek-V3"

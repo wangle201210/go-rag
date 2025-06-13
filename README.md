@@ -38,8 +38,8 @@ git clone https://github.com/wangle201210/go-rag.git
 
 ### 使用 Docker Compose 快速启动（推荐）
 ```bash
-cp server/manifest/config/config.example.yaml server/manifest/config/config.yaml 
-# 修改配置文件中的embedding、chat的配置
+cp server/manifest/config/config_demo.yaml server/manifest/config/config.yaml 
+# 修改配置文件中的embedding、chat、mysql、es等配置
 docker compose up -d
 # 浏览器打开 http://localhost:8000
 ```
@@ -48,8 +48,8 @@ docker compose up -d
 如果有可用的es8和mysql,可以直接快速启动项目，否则需要先安装es8和mysql  
 需要修改`config.yaml`文件的相关配置
 ```bash
-cp server/manifest/config/config.example.yaml server/manifest/config/config.yaml 
-# 修改配置文件中的embedding、chat、mysql、es的配置
+cp server/manifest/config/config_demo.yaml server/manifest/config/config.yaml 
+# 修改配置文件中的embedding、chat、mysql、es等配置
 make build
 make run
 # 浏览器打开 http://localhost:8000
