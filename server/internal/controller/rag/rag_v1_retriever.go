@@ -37,10 +37,6 @@ func (c *ControllerV1) Retriever(ctx context.Context, req *v1.RetrieverReq) (res
 	for _, document := range msg {
 		if document.MetaData != nil {
 			delete(document.MetaData, "_dense_vector")
-			if v, e := document.MetaData["_score"]; e {
-				vf := v.(float64)
-				document.MetaData["_score"] = vf - 1
-			}
 			m := make(map[string]interface{})
 			if err = json.Unmarshal([]byte(document.MetaData["ext"].(string)), &m); err != nil {
 				return

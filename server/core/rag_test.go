@@ -11,6 +11,7 @@ import (
 )
 
 var ragSvr = &Rag{}
+var cfg = &config.Config{}
 
 func _init() {
 	ctx := context.Background()
@@ -21,27 +22,29 @@ func _init() {
 		log.Printf("NewClient of es8 failed, err=%v", err)
 		return
 	}
-	ragSvr, err = New(context.Background(), &config.Config{
+	cfg = &config.Config{
 		Client:         client,
-		IndexName:      "rag-test",
+		IndexName:      "rag-test1",
 		APIKey:         g.Cfg().MustGet(ctx, "embedding.apiKey").String(),
 		BaseURL:        g.Cfg().MustGet(ctx, "embedding.baseURL").String(),
 		EmbeddingModel: g.Cfg().MustGet(ctx, "embedding.model").String(),
 		ChatModel:      g.Cfg().MustGet(ctx, "chat.model").String(),
-	})
+	}
+	ragSvr, err = New(context.Background(), cfg)
 	if err != nil {
 		log.Printf("New of rag failed, err=%v", err)
 		return
 	}
 }
 func TestIndex(t *testing.T) {
+	_init()
 	ctx := context.Background()
 	uriList := []string{
 		"./test_file/readme.md",
-		"./test_file/readme2.md",
-		"./test_file/readme.html",
-		"./test_file/test.pdf",
-		"https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html",
+		// "./test_file/readme2.md",
+		// "./test_file/readme.html",
+		// "./test_file/test.pdf",
+		// "https://deepchat.thinkinai.xyz/docs/guide/advanced-features/shortcuts.html",
 	}
 	for _, s := range uriList {
 		req := &IndexReq{
@@ -62,10 +65,10 @@ func TestRetriever(t *testing.T) {
 	_init()
 	ctx := context.Background()
 	req := &RetrieveReq{
-		Query:         "deepchat支持哪些国家的语言",
+		Query:         "dify知识库配置",
 		TopK:          5,
 		Score:         1.2,
-		KnowledgeName: "deepchat",
+		KnowledgeName: "deepchat使用文档",
 	}
 	msg, err := ragSvr.Retrieve(ctx, req)
 	if err != nil {

@@ -34,3 +34,4 @@ server/manifest/config/config.yaml
 /server/go-rag-server
 /server/logs/
 /data/
+/server/manifest/config/config-docker.yaml

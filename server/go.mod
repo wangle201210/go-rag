@@ -7,16 +7,17 @@ require (
 	github.com/bytedance/sonic v1.13.2
 	github.com/cloudwego/eino v0.3.31
 	github.com/cloudwego/eino-ext/components/document/loader/file v0.0.0-20250424061409-ccd60fbc7c1c
-	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250605072634-0f875e04269d
+	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/document/parser/pdf v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/document/transformer/reranker/score v0.0.0-20250513023651-7b19c6ffbf4a
-	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250605072634-0f875e04269d
+	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20250424061409-ccd60fbc7c1c
-	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250605072634-0f875e04269d
-	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250512035704-1e06fdfda207
-	github.com/cloudwego/eino-ext/components/retriever/es8 v0.0.0-20250424061409-ccd60fbc7c1c
+	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250610035057-2c4e7c8488a5
+	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250610035057-2c4e7c8488a5
+	github.com/cloudwego/eino-ext/components/model/qwen v0.0.0-20250610035057-2c4e7c8488a5
+	github.com/cloudwego/eino-ext/components/retriever/es8 v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/elastic/go-elasticsearch/v8 v8.16.0
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.9.0
 	github.com/gogf/gf/v2 v2.9.0
@@ -34,11 +35,12 @@ require (
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250422092704-54e372e1fa3d // indirect
+	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250610035057-2c4e7c8488a5 // indirect
 	github.com/dslipak/pdf v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elastic/elastic-transport-go/v8 v8.7.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
+	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/getkin/kin-openapi v0.118.0 // indirect
@@ -62,7 +64,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/meguminnnnnnnnn/go-openai v0.0.0-20250408071642-761325becfd6 // indirect
+	github.com/meguminnnnnnnnn/go-openai v0.0.0-20250530094841-88286040d3c1 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

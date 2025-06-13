@@ -22,6 +22,11 @@ func createIndex(ctx context.Context, client *elasticsearch.Client, indexName st
 					Index:      Of(true),
 					Similarity: Of("cosine"),
 				},
+				FieldQAContentVector: &types.DenseVectorProperty{
+					Dims:       Of(1024), // same as embedding dimensions
+					Index:      Of(true),
+					Similarity: Of("cosine"),
+				},
 			},
 		},
 	}).Do(ctx)
