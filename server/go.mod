@@ -10,7 +10,6 @@ require (
 	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/document/parser/pdf v0.0.0-20250424061409-ccd60fbc7c1c
-	github.com/cloudwego/eino-ext/components/document/transformer/reranker/score v0.0.0-20250513023651-7b19c6ffbf4a
 	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20250424061409-ccd60fbc7c1c

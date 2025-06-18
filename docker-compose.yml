@@ -2,8 +2,8 @@ version: '3'
 
 services:
   go-rag:
-    image: iwangle/go-rag:v0.0.4
-#    build:
+    image: iwangle/go-rag:v0.0.5
+    #    build:
 #      context: .
 #      dockerfile: Dockerfile
     ports:
@@ -22,8 +22,10 @@ services:
       # 如果需要持久化配置或数据，可以添加相应的卷挂载，目前是在构建镜像时就copy过去的
       - ./server/manifest/config/config-docker.yaml:/app/manifest/config/config.yaml
     depends_on:
-      - elasticsearch
-      - mysql
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
 
   elasticsearch:
     image: elasticsearch:8.11.3
@@ -39,6 +41,11 @@ services:
     volumes:
       - ./data/es_data:/usr/share/elasticsearch/data
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   mysql:
     image: mysql:8.0
@@ -51,3 +58,8 @@ services:
     volumes:
       - ./data/mysql_data:/var/lib/mysql
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
