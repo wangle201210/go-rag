@@ -13,6 +13,8 @@
    ![](./server/static/mcp-cfg.png)
    ![](./server/static/mcp-use.png)
 
+## roadmap
+[roadmap](./roadmap.md)
 
 ## 存储层
 - [x] es8存储向量相关数据
