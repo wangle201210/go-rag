@@ -38,6 +38,7 @@ git clone https://github.com/wangle201210/go-rag.git
 
 ### 使用 Docker Compose 快速启动（推荐）
 ```bash
+cd go-rag
 cp server/manifest/config/config_demo.yaml server/manifest/config/config.yaml 
 # 修改配置文件中的embedding、chat、mysql、es等配置
 docker compose up -d

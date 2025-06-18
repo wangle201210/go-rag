@@ -24,7 +24,7 @@ type KnowledgeBaseColumns struct {
 	Name        string // 知识库名称
 	Description string // 知识库描述
 	Category    string // 知识库分类
-	Status      string // 状态：0-禁用，1-启用
+	Status      string // 状态：1-启用,2-禁用
 	CreateTime  string // 创建时间
 	UpdateTime  string // 更新时间
 }

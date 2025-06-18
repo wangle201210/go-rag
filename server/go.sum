@@ -35,8 +35,6 @@ github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061
 github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061409-ccd60fbc7c1c/go.mod h1:w6f/1eEScd32tenRKwcYIJKqZ+3cArFOia1QxFsQmVE=
 github.com/cloudwego/eino-ext/components/document/parser/pdf v0.0.0-20250424061409-ccd60fbc7c1c h1:BBdsRDuIf7aSkUSUbrh2ojzIxCBxStPC05ofqjenR2E=
 github.com/cloudwego/eino-ext/components/document/parser/pdf v0.0.0-20250424061409-ccd60fbc7c1c/go.mod h1:Vpoaj8exHtu8EbRaAZTFRT7UaKslXd5nx7Z0EEVDIvY=
-github.com/cloudwego/eino-ext/components/document/transformer/reranker/score v0.0.0-20250513023651-7b19c6ffbf4a h1:Qce5GskHlDgAxyecVY8ur/5PFUmDQydusnHhRj4SCCg=
-github.com/cloudwego/eino-ext/components/document/transformer/reranker/score v0.0.0-20250513023651-7b19c6ffbf4a/go.mod h1:jdx8WFGep99tjWYAPp36pM8Gnw4pzPy+li2UZZZFjDE=
 github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250610035057-2c4e7c8488a5 h1:i1EMukyRVqdEQOnQHNJ2I8H6GMBCGxCHA0GjqNE03Q4=
 github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20250610035057-2c4e7c8488a5/go.mod h1:qZxYTU/Snj6bvoyOe4ZKhb1ZgLUiuYcKbClTl15rPRI=
 github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive v0.0.0-20250424061409-ccd60fbc7c1c h1:u6iPDaZkgSrlHm0cDm2zTIEF8ODS/2inRRmfeI2Sebs=

@@ -28,7 +28,6 @@ func InitDB() error {
 	}
 	dsn := GetDsn()
 
-	println(dsn)
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), config)
 	if err != nil {
