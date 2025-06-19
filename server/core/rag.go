@@ -33,6 +33,7 @@ type Rag struct {
 	cm         model.BaseChatModel
 
 	grader *grader.Grader // 暂时先弃用，使用 grader 会严重影响rag的速度
+	conf   *config.Config
 }
 
 func New(ctx context.Context, conf *config.Config) (*Rag, error) {
@@ -73,6 +74,7 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 		qaRtrvr:    qaRetriever,
 		client:     conf.Client,
 		cm:         cm,
+		conf:       conf,
 		// grader:  grader.NewGrader(cm),
 	}, nil
 }

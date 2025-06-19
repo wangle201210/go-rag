@@ -15,7 +15,7 @@ func BuildIndexerAsync(ctx context.Context, conf *config.Config) (r compose.Runn
 	)
 
 	g := compose.NewGraph[[]*schema.Document, []string]()
-	indexer2KeyOfIndexer, err := newIndexer(ctx, conf)
+	indexer2KeyOfIndexer, err := newAsyncIndexer(ctx, conf)
 	if err != nil {
 		return nil, err
 	}

@@ -27,48 +27,7 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 			search_mode.DenseVectorSimilarityTypeCosineSimilarity,
 			vectorField,
 		),
-		ResultParser: func(ctx context.Context, hit types.Hit) (doc *schema.Document, err error) {
-			doc = &schema.Document{
-				ID:       *hit.Id_,
-				MetaData: map[string]any{},
-			}
-
-			var src map[string]any
-			if err = sonic.Unmarshal(hit.Source_, &src); err != nil {
-				return nil, err
-			}
-
-			for field, val := range src {
-				switch field {
-				case common.FieldContent:
-					doc.Content = val.(string)
-				case common.FieldContentVector:
-					var v []float64
-					for _, item := range val.([]interface{}) {
-						v = append(v, item.(float64))
-					}
-					doc.WithDenseVector(v)
-				case common.FieldQAContentVector, common.FieldQAContent:
-					// 这两个字段都不返回
-
-				case common.FieldExtra:
-					if val == nil {
-						continue
-					}
-					doc.MetaData[common.FieldExtra] = val.(string)
-				case common.KnowledgeName:
-					doc.MetaData[common.KnowledgeName] = val.(string)
-				default:
-					return nil, fmt.Errorf("unexpected field=%s, val=%v", field, val)
-				}
-			}
-
-			if hit.Score_ != nil {
-				doc.WithScore(float64(*hit.Score_))
-			}
-
-			return doc, nil
-		},
+		ResultParser: EsHit2Document,
 	}
 	embeddingIns11, err := common.NewEmbedding(ctx, conf)
 	if err != nil {
@@ -80,4 +39,47 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 		return nil, err
 	}
 	return rtr, nil
+}
+
+func EsHit2Document(ctx context.Context, hit types.Hit) (doc *schema.Document, err error) {
+	doc = &schema.Document{
+		ID:       *hit.Id_,
+		MetaData: map[string]any{},
+	}
+
+	var src map[string]any
+	if err = sonic.Unmarshal(hit.Source_, &src); err != nil {
+		return nil, err
+	}
+
+	for field, val := range src {
+		switch field {
+		case common.FieldContent:
+			doc.Content = val.(string)
+		case common.FieldContentVector:
+			var v []float64
+			for _, item := range val.([]interface{}) {
+				v = append(v, item.(float64))
+			}
+			doc.WithDenseVector(v)
+		case common.FieldQAContentVector, common.FieldQAContent:
+			// 这两个字段都不返回
+
+		case common.FieldExtra:
+			if val == nil {
+				continue
+			}
+			doc.MetaData[common.FieldExtra] = val.(string)
+		case common.KnowledgeName:
+			doc.MetaData[common.KnowledgeName] = val.(string)
+		default:
+			return nil, fmt.Errorf("unexpected field=%s, val=%v", field, val)
+		}
+	}
+
+	if hit.Score_ != nil {
+		doc.WithScore(float64(*hit.Score_))
+	}
+
+	return doc, nil
 }
