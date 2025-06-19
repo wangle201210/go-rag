@@ -27,10 +27,14 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 				err = fmt.Errorf("必须提供知识库名称")
 				return
 			}
-			doc.ID = uuid.New().String()
+			// 没传入才需要生成
+			if len(doc.ID) == 0 {
+				doc.ID = uuid.New().String()
+			}
 			if doc.MetaData != nil {
-				marshal, _ := sonic.Marshal(doc.MetaData)
-				doc.MetaData[common.DocExtra] = string(marshal)
+				// 存储ext数据
+				marshal, _ := sonic.Marshal(getExtData(doc))
+				doc.MetaData[common.FieldExtra] = string(marshal)
 			}
 			return map[string]es8.FieldValue{
 				common.FieldContent: {
@@ -38,7 +42,7 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 					EmbedKey: common.FieldContentVector,
 				},
 				common.FieldExtra: {
-					Value: doc.MetaData[common.DocExtra],
+					Value: doc.MetaData[common.FieldExtra],
 				},
 				common.KnowledgeName: {
 					Value: knowledgeName,
@@ -77,4 +81,17 @@ func getMdContentWithTitle(doc *schema.Document) string {
 		return doc.Content
 	}
 	return title + "\n" + doc.Content
+}
+
+func getExtData(doc *schema.Document) map[string]any {
+	if doc.MetaData == nil {
+		return nil
+	}
+	res := make(map[string]any)
+	for _, key := range common.ExtKeys {
+		if v, e := doc.MetaData[key]; e {
+			res[key] = v
+		}
+	}
+	return res
 }

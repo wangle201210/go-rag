@@ -25,11 +25,12 @@ const (
 )
 
 type Rag struct {
-	idxer   compose.Runnable[any, []string]
-	rtrvr   compose.Runnable[string, []*schema.Document]
-	qaRtrvr compose.Runnable[string, []*schema.Document]
-	client  *elasticsearch.Client
-	cm      model.BaseChatModel
+	idxer      compose.Runnable[any, []string]
+	idxerAsync compose.Runnable[[]*schema.Document, []string]
+	rtrvr      compose.Runnable[string, []*schema.Document]
+	qaRtrvr    compose.Runnable[string, []*schema.Document]
+	client     *elasticsearch.Client
+	cm         model.BaseChatModel
 
 	grader *grader.Grader // 暂时先弃用，使用 grader 会严重影响rag的速度
 }
@@ -44,6 +45,10 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 		return nil, err
 	}
 	buildIndex, err := indexer.BuildIndexer(ctx, conf)
+	if err != nil {
+		return nil, err
+	}
+	buildIndexAsync, err := indexer.BuildIndexerAsync(ctx, conf)
 	if err != nil {
 		return nil, err
 	}
@@ -62,11 +67,12 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 		return nil, err
 	}
 	return &Rag{
-		idxer:   buildIndex,
-		rtrvr:   buildRetriever,
-		qaRtrvr: qaRetriever,
-		client:  conf.Client,
-		cm:      cm,
+		idxer:      buildIndex,
+		idxerAsync: buildIndexAsync,
+		rtrvr:      buildRetriever,
+		qaRtrvr:    qaRetriever,
+		client:     conf.Client,
+		cm:         cm,
 		// grader:  grader.NewGrader(cm),
 	}, nil
 }

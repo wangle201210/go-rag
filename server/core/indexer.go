@@ -4,11 +4,17 @@ import (
 	"context"
 
 	"github.com/cloudwego/eino/components/document"
+	"github.com/cloudwego/eino/schema"
 	"github.com/wangle201210/go-rag/server/core/common"
 )
 
 type IndexReq struct {
 	URI           string // 文档地址，可以是文件路径（pdf，html，md等），也可以是网址
+	KnowledgeName string // 知识库名称
+}
+
+type IndexAsyncReq struct {
+	Docs          []*schema.Document
 	KnowledgeName string // 知识库名称
 }
 
@@ -18,6 +24,15 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 	}
 	ctx = context.WithValue(ctx, common.KnowledgeName, req.KnowledgeName)
 	ids, err = x.idxer.Invoke(ctx, s)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (x *Rag) IndexAsync(ctx context.Context, req *IndexAsyncReq) (ids []string, err error) {
+	ctx = context.WithValue(ctx, common.KnowledgeName, req.KnowledgeName)
+	ids, err = x.idxerAsync.Invoke(ctx, req.Docs)
 	if err != nil {
 		return
 	}

@@ -55,7 +55,7 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 					if val == nil {
 						continue
 					}
-					doc.MetaData[common.DocExtra] = val.(string)
+					doc.MetaData[common.FieldExtra] = val.(string)
 				case common.KnowledgeName:
 					doc.MetaData[common.KnowledgeName] = val.(string)
 				default:
