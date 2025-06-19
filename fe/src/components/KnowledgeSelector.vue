@@ -9,8 +9,8 @@
     >
       <template #reference>
         <el-button type="info" plain size="small">
-          <el-icon><Folder /></el-icon>
-          知识库设置
+          <el-icon><Edit /> </el-icon>
+              当前知识库：{{ selectedKnowledgeId}}
         </el-button>
       </template>
       
@@ -64,7 +64,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Folder } from '@element-plus/icons-vue'
+import {Edit} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
@@ -86,7 +86,6 @@ const STORAGE_KEY = 'go_rag_selected_knowledge_id'
 onMounted(async () => {
   // 从本地存储获取已保存的知识库ID
   const savedKnowledgeId = localStorage.getItem(STORAGE_KEY)
-  console.log("11111:", savedKnowledgeId)
 
   if (savedKnowledgeId) {
     selectedKnowledgeId.value = savedKnowledgeId
@@ -102,17 +101,15 @@ const fetchKnowledgeBaseList = async () => {
   try {
     const response = await axios.get('/v1/kb')
     knowledgeBaseList.value = response.data.data.list || []
-    console.log("知识库id:", selectedKnowledgeId.value)
-    console.log("knowledgeBaseList:", knowledgeBaseList.value)
     // 如果有选中的知识库ID但在列表中不存在或已禁用，则清空选择
     if (selectedKnowledgeId.value) {
       const selected = knowledgeBaseList.value.find(
         item => item.name === selectedKnowledgeId.value && item.status !== 2
       )
-      // if (!selected) {
-      //   selectedKnowledgeId.value = ''
-      //   localStorage.removeItem(STORAGE_KEY)
-      // }
+      if (!selected) {
+        selectedKnowledgeId.value = ''
+        localStorage.removeItem(STORAGE_KEY)
+      }
     }
     
     // 如果没有选中的知识库，且列表中有可用的知识库，则自动选择第一个

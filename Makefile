@@ -41,7 +41,7 @@ build-linux:
 run-by-docker:
 	docker compose -f docker-compose.yml up -d
 
-v := v0.0.5
+v := v0.0.6
 buildx:
 	docker buildx build \
 		--platform linux/arm64,linux/amd64 \
