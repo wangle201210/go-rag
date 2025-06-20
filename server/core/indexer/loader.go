@@ -18,7 +18,7 @@ func newLoader(ctx context.Context) (ldr document.Loader, err error) {
 		return nil, err
 	}
 	fldr, err := file.NewFileLoader(ctx, &file.FileLoaderConfig{
-		UseNameAsID: true,
+		UseNameAsID: false,
 		Parser:      parser,
 	})
 	if err != nil {

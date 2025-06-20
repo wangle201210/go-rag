@@ -37,6 +37,10 @@ func qa(ctx context.Context, docs []*schema.Document) (output []*schema.Document
 }
 
 func getQAContent(ctx context.Context, doc *schema.Document, knowledgeName string) (qaContent string, err error) {
+	// 已经有数据了就不要再生成了
+	if s, ok := doc.MetaData[common.FieldQAContent].(string); ok && len(s) > 0 {
+		return s, nil
+	}
 	cm, err := common.GetQAModel(ctx, nil)
 	if err != nil {
 		return

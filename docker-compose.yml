@@ -2,7 +2,7 @@ version: '3'
 
 services:
   go-rag:
-    image: iwangle/go-rag:v0.0.7
+    image: iwangle/go-rag:v0.0.8
     #    build:
 #      context: .
 #      dockerfile: Dockerfile
