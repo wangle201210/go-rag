@@ -20,4 +20,5 @@ type IRagV1 interface {
 	KBGetOne(ctx context.Context, req *v1.KBGetOneReq) (res *v1.KBGetOneRes, err error)
 	KBGetList(ctx context.Context, req *v1.KBGetListReq) (res *v1.KBGetListRes, err error)
 	Retriever(ctx context.Context, req *v1.RetrieverReq) (res *v1.RetrieverRes, err error)
+	RetrieverDify(ctx context.Context, req *v1.RetrieverDifyReq) (res *v1.RetrieverDifyRes, err error)
 }
