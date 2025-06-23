@@ -111,7 +111,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Folder, Plus } from '@element-plus/icons-vue'
-import axios from 'axios'
+import request from '../utils/request'
 
 // 知识库列表
 const knowledgeBaseList = ref([])
@@ -159,8 +159,8 @@ onMounted(() => {
 const fetchKnowledgeBaseList = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/v1/kb')
-    knowledgeBaseList.value = response.data.data.list || []
+    const response = await request.get('/v1/kb')
+    knowledgeBaseList.value = response.data.list || []
   } catch (error) {
     console.error('获取知识库列表失败:', error)
     ElMessage.error('获取知识库列表失败: ' + (error.response?.data?.message || '未知错误'))
@@ -210,7 +210,7 @@ const submitForm = async () => {
     try {
       if (isEdit.value) {
         // 编辑知识库
-        await axios.put(`/v1/kb/${kbForm.id}`, {
+        await request.put(`/v1/kb/${kbForm.id}`, {
           name: kbForm.name,
           description: kbForm.description,
           category: kbForm.category,
@@ -219,7 +219,7 @@ const submitForm = async () => {
         ElMessage.success('知识库更新成功')
       } else {
         // 创建知识库
-        await axios.post('/v1/kb', {
+        await request.post('/v1/kb', {
           name: kbForm.name,
           description: kbForm.description,
           category: kbForm.category,
@@ -251,7 +251,7 @@ const confirmDelete = (row) => {
     }
   ).then(async () => {
     try {
-      await axios.delete(`/v1/kb/${row.id}`)
+      await request.delete(`/v1/kb/${row.id}`)
       ElMessage.success('知识库删除成功')
       fetchKnowledgeBaseList()
     } catch (error) {

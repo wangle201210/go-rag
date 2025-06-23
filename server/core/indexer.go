@@ -11,23 +11,29 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	v1 "github.com/wangle201210/go-rag/server/api/rag/v1"
 	"github.com/wangle201210/go-rag/server/core/common"
 	"github.com/wangle201210/go-rag/server/core/retriever"
+	"github.com/wangle201210/go-rag/server/internal/logic/knowledge"
+	"github.com/wangle201210/go-rag/server/internal/model/entity"
 )
 
 type IndexReq struct {
 	URI           string // 文档地址，可以是文件路径（pdf，html，md等），也可以是网址
 	KnowledgeName string // 知识库名称
+	DocumentsId   int    // 文档ID
 }
 
 type IndexAsyncReq struct {
 	Docs          []*schema.Document
 	KnowledgeName string // 知识库名称
+	DocumentsId   int    // 文档ID
 }
 
 type IndexAsyncByDocsIDReq struct {
 	DocsIDs       []string
 	KnowledgeName string // 知识库名称
+	DocumentsId   int    // 文档ID
 }
 
 // Index
@@ -56,6 +62,7 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 		_, err = x.indexAsyncByDocsID(ctxN, &IndexAsyncByDocsIDReq{
 			DocsIDs:       ids,
 			KnowledgeName: req.KnowledgeName,
+			DocumentsId:   req.DocumentsId,
 		})
 		if err != nil {
 			g.Log().Errorf(ctxN, "indexAsyncByDocsID failed, err=%v", err)
@@ -72,6 +79,7 @@ func (x *Rag) IndexAsync(ctx context.Context, req *IndexAsyncReq) (ids []string,
 	if err != nil {
 		return
 	}
+
 	return
 }
 
@@ -97,6 +105,7 @@ func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq
 		return
 	}
 	var docs []*schema.Document
+	var chunks []entity.KnowledgeChunks
 	for _, hit := range resp.Hits.Hits {
 		doc := &schema.Document{}
 		doc, err = retriever.EsHit2Document(ctx, hit)
@@ -106,16 +115,34 @@ func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq
 		}
 		docParseExt(doc)
 		docs = append(docs, doc)
-		g.Log().Infof(ctx, "indexAsyncByDocsID get doc: %s", doc.ID)
+
+		ext, err := sonic.Marshal(doc.MetaData)
+		if err != nil {
+			g.Log().Errorf(ctx, "sonic.Marshal failed, err=%v", err)
+			continue
+		}
+		chunks = append(chunks, entity.KnowledgeChunks{
+			KnowledgeDocId: req.DocumentsId,
+			EsChunkId:      doc.ID,
+			Content:        doc.Content,
+			Ext:            string(ext),
+		})
 	}
+	if err = knowledge.SaveChunksData(ctx, req.DocumentsId, chunks); err != nil {
+		// 这里不返回err，不影响用户使用
+		g.Log().Errorf(ctx, "indexAsyncByDocsID insert chunks failed, err=%v", err)
+	}
+
 	asyncReq := &IndexAsyncReq{
 		Docs:          docs,
 		KnowledgeName: req.KnowledgeName,
+		DocumentsId:   req.DocumentsId,
 	}
 	ids, err = x.IndexAsync(ctx, asyncReq)
 	if err != nil {
 		return
 	}
+	knowledge.UpdateDocumentsStatus(ctx, req.DocumentsId, int(v1.StatusActive))
 	return
 }
 
@@ -130,4 +157,8 @@ func docParseExt(doc *schema.Document) {
 		}
 		doc.MetaData = extData
 	}
+}
+
+func (x *Rag) DeleteDocument(ctx context.Context, documentID string) error {
+	return common.DeleteDocument(ctx, x.conf.Client, documentID)
 }

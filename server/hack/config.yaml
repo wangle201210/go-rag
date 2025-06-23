@@ -1,6 +1,6 @@
 gfcli:
   gen:
     dao:
-      - link: "mysql:root:123456@tcp(127.0.0.1:3306)/go-rag"
+      - link: "mysql:root:123456@tcp(127.0.0.1:3306)/go-rag?charset=utf8mb4&parseTime=True&loc=Local"
         descriptionTag: true
-        tables: "knowledge_base"
+        tables: "knowledge_base,knowledge_chunks,knowledge_documents"

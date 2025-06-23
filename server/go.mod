@@ -5,6 +5,7 @@ go 1.23.1
 require (
 	github.com/ThinkInAIXYZ/go-mcp v0.2.14
 	github.com/bytedance/sonic v1.13.2
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cloudwego/eino v0.3.31
 	github.com/cloudwego/eino-ext/components/document/loader/file v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250610035057-2c4e7c8488a5
