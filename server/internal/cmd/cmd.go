@@ -23,6 +23,8 @@ var (
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				s.AddStaticPath("", "./static/fe/")
 				s.SetIndexFiles([]string{"index.html"})
+			})
+			s.Group("/api", func(group *ghttp.RouterGroup) {
 				group.Middleware(MiddlewareHandlerResponse, ghttp.MiddlewareCORS)
 				group.Bind(
 					rag.NewV1(),
