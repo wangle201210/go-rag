@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/wangle201210/go-rag/server/internal/model"
+	gormModel "github.com/wangle201210/go-rag/server/internal/model/gorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -45,7 +45,7 @@ func InitDB() error {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	// 自动迁移数据库表结构
-	if err = autoMigrateTables(); err != nil {
+	if err = gormModel.AutoMigrate(db); err != nil {
 		return fmt.Errorf("failed to migrate database tables: %v", err)
 	}
 
@@ -63,10 +63,4 @@ func GetDB() *gorm.DB {
 		g.Log().Fatal(context.Background(), "database connection not initialized")
 	}
 	return db
-}
-
-// autoMigrateTables 自动迁移数据库表结构
-func autoMigrateTables() error {
-	// 自动迁移会创建表、缺失的外键、约束、列和索引
-	return db.AutoMigrate(&model.KnowledgeBase{})
 }

@@ -66,7 +66,7 @@
 import { ref, computed, onMounted } from 'vue'
 import {Edit} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import request from '../utils/request'
 
 // 组件状态
 const popoverVisible = ref(false)
@@ -99,8 +99,8 @@ onMounted(async () => {
 const fetchKnowledgeBaseList = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/v1/kb')
-    knowledgeBaseList.value = response.data.data.list || []
+    const response = await request.get('/v1/kb')
+    knowledgeBaseList.value = response.data.list || []
     // 如果有选中的知识库ID但在列表中不存在或已禁用，则清空选择
     if (selectedKnowledgeId.value) {
       const selected = knowledgeBaseList.value.find(

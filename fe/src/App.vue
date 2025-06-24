@@ -16,6 +16,10 @@
             <el-icon><Folder /></el-icon>
             <span>知识库管理</span>
           </el-menu-item>
+          <el-menu-item index="/knowledge-documents">
+            <el-icon><Document /></el-icon>
+            <span>文档数据集</span>
+          </el-menu-item>
           <el-menu-item index="/indexer">
             <el-icon><Upload /></el-icon>
             <span>文档索引</span>
@@ -53,7 +57,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Folder } from '@element-plus/icons-vue'
+import { Folder, Document } from '@element-plus/icons-vue'
 </script>
 
 <style scoped>
