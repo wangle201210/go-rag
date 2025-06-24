@@ -12,7 +12,7 @@ import (
 func (c *ControllerV1) DocumentsDelete(ctx context.Context, req *v1.DocumentsDeleteReq) (res *v1.DocumentsDeleteRes, err error) {
 	svr := rag.GetRagSvr()
 
-	ChunksList, err := knowledge.GetAllChunksByDocId(ctx, req.DocumentId, "id", "es_chunk_id")
+	ChunksList, err := knowledge.GetAllChunksByDocId(ctx, req.DocumentId, "id", "chunk_id")
 	if err != nil {
 		g.Log().Errorf(ctx, "DeleteDocumentAndChunks: GetAllChunksByDocId failed for id %d, err: %v", req.DocumentId, err)
 		return

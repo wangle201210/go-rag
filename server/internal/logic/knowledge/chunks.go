@@ -33,7 +33,7 @@ func GetChunksList(ctx context.Context, where entity.KnowledgeChunks, page, size
 		model = model.Where("knowledge_doc_id", where.KnowledgeDocId)
 	}
 	if where.ChunkId != "" {
-		model = model.Where("es_chunk_id", where.ChunkId)
+		model = model.Where("chunk_id", where.ChunkId)
 	}
 
 	// 获取总数
