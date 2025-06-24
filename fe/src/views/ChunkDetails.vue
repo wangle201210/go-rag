@@ -14,7 +14,7 @@
         <el-card v-for="chunk in chunksList" :key="chunk.id" class="chunk-item-card">
           <template #header>
             <div class="chunk-card-header">
-              <span>ES Chunk ID: {{ chunk.ChunkId }}</span>
+              <span>Chunk ID: {{ chunk.chunkId }}</span>
               <el-space>
                 <el-button 
                   text 
@@ -182,7 +182,7 @@ const handleSaveEdit = async (chunk) => {
 const handleDeleteChunk = async (chunk) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除分块ID为 ${chunk.ChunkId} 的内容吗？此操作不可恢复。`,
+      `确定要删除分块ID为 ${chunk.chunkId} 的内容吗？此操作不可恢复。`,
       '确认删除',
       {
         confirmButtonText: '确定删除',
