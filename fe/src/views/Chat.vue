@@ -174,7 +174,6 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { User, Service, ChatDotRound, ChatRound, Plus, Position, Setting, Document, CopyDocument } from '@element-plus/icons-vue'
-import axios from 'axios'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
@@ -262,7 +261,7 @@ const sendMessage = async () => {
   try {
     // 使用fetch API进行流式请求
     references.value = [];
-    const response = await fetch('/v1/chat/stream', {
+    const response = await fetch('/api/v1/chat/stream', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

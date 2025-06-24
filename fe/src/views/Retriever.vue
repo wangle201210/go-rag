@@ -100,6 +100,7 @@ import DOMPurify from 'dompurify'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import KnowledgeSelector from '../components/KnowledgeSelector.vue'
+import request from "../utils/request";
 
 // 配置Marked和代码高亮
 marked.setOptions({
@@ -146,13 +147,13 @@ const handleSearch = async () => {
   searched.value = true
   
   try {
-    const response = await axios.post('/v1/retriever', {
+    const response = await request.post('/v1/retriever', {
       question: searchForm.question,
       top_k: searchForm.top_k,
       score: searchForm.score,
       knowledge_name: knowledgeSelectorRef.value?.getSelectedKnowledgeId() || ''
     })
-    searchResults.value = response.data.data.document || []
+    searchResults.value = response.data.document || []
     
     if (searchResults.value.length === 0) {
       ElMessage.info('未找到相关文档')

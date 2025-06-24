@@ -15,6 +15,7 @@ database:
     pass: "123456" # 密码
     name: "go-rag" # 数据库名称
     type: "mysql" # 数据库类型
+    charset: "utf8mb4" # 数据库编码，一定要加上，因为文档里面经常出现特殊字符
 
 es:
   address: "http://elasticsearch:9200"

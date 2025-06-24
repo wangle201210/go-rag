@@ -5,11 +5,14 @@
 2. 选择需要使用的知识库，上传文档
    ![](./server/static/kb-select.png)
    ![](./server/static/indexer.png)
-3. 检索
+3. 文档列表 & chunk 编辑
+   ![](./server/static/doc-list.png)
+   ![](./server/static/chunk-edit.png)
+4. 文档检索
    ![](./server/static/retriever.png)
-4. 对话
+5. 对话
    ![](./server/static/chat.png)
-5. mcp （以集成到deepchat为例）
+6. mcp （以集成到deepchat为例）
    ![](./server/static/mcp-cfg.png)
    ![](./server/static/mcp-use.png)
 
@@ -24,13 +27,10 @@
 - [x] 网页解析
 - [x] 文档检索
 - [x] 长文档自动切割(chunk)
-- [x] 提供http接口 [rag-api](./server/README.md)
-- [x] 提供 index、retrieve、chat 的前端界面
 - [x] 多知识库支持
-
-
-## 未来计划
-- [ ] 使用mysql存储chunk和文档的映射关系，目前放在es的ext字段
+- [x] chunk 编辑
+- [x] 自动生成 QA 对
+- [x] 多路召回
 
 ## 使用
 ### clone项目
@@ -65,6 +65,9 @@ make run
 docker run -d --name elasticsearch \
   -e "discovery.type=single-node" \
   -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+  -e "cluster.routing.allocation.disk.watermark.low=1gb" \
+  -e "cluster.routing.allocation.disk.watermark.high=1gb" \
+  -e "cluster.routing.allocation.disk.watermark.flood_stage=1gb" \
   -e "xpack.security.enabled=false" \
   -p 9200:9200 \
   -p 9300:9300 \

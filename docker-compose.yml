@@ -20,7 +20,7 @@ services:
       - MYSQL_DATABASE=go-rag
     volumes:
       # 如果需要持久化配置或数据，可以添加相应的卷挂载，目前是在构建镜像时就copy过去的
-      - ./server/manifest/config/config-docker.yaml:/app/manifest/config/config.yaml
+      - ./server/manifest/config/config.yaml:/app/manifest/config/config.yaml
     depends_on:
       mysql:
         condition: service_healthy
@@ -53,6 +53,7 @@ services:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=go-rag
       - MYSQL_ROOT_HOST=%  # 允许root从任意主机连接
+      - MYSQL_CHARSET=utf8mb4  # 设置数据库字符集为utf8mb4
     ports:
       - "3306:3306"
     volumes:
