@@ -35,3 +35,4 @@ server/manifest/config/config.yaml
 /server/logs/
 /data/
 /server/manifest/config/config-docker.yaml
+/server/manifest/config/frpc.toml

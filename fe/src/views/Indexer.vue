@@ -14,7 +14,7 @@
         <el-upload
           class="upload-component"
           drag
-          action="/v1/indexer"
+          action="/api/v1/indexer"
           :on-success="handleUploadSuccess"
           :on-error="handleUploadError"
           :before-upload="beforeUpload"
