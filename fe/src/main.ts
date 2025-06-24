@@ -9,8 +9,8 @@ import { ViteSSG } from 'vite-ssg'
 
 // or use cdn, uncomment cdn link in `index.html`
 
-import { routes } from 'vue-router/auto-routes'
 import App from './App.vue'
+import router from './router'
 
 import '~/styles/index.scss'
 
@@ -34,8 +34,9 @@ import 'element-plus/theme-chalk/src/message-box.scss'
 export const createApp = ViteSSG(
   App,
   {
-    routes,
+    routes: router.options.routes,
     base: import.meta.env.BASE_URL,
+    history: router.options.history,
   },
   (ctx) => {
     // install all modules under `modules/`

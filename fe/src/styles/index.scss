@@ -1,6 +1,9 @@
 // import dark theme
 @use 'element-plus/theme-chalk/src/dark/css-vars.scss' as *;
 
+// import common styles
+@import './common.css';
+
 // :root {
 //   --ep-color-primary: red;
 // }

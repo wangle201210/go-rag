@@ -266,24 +266,11 @@ const confirmDelete = (row) => {
 
 <style scoped>
 .kb-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  margin: 10px;
 }
 
 .kb-card {
   margin-bottom: 20px;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.header-icon {
-  margin-right: 8px;
-  font-size: 18px;
 }
 
 .add-kb-btn {
@@ -296,18 +283,5 @@ const confirmDelete = (row) => {
 
 .empty-kb {
   height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.empty-icon {
-  font-size: 60px;
-  color: #909399;
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
 }
 </style>

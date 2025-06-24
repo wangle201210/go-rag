@@ -21,7 +21,8 @@ import (
 
 const (
 	scoreThreshold = 1.05 // 设置一个很小的阈值
-	esTopK         = 10
+	esTopK         = 50
+	esTryFindDoc   = 10
 )
 
 type Rag struct {

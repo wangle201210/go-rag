@@ -34,6 +34,7 @@ type IndexAsyncByDocsIDReq struct {
 	DocsIDs       []string
 	KnowledgeName string // 知识库名称
 	DocumentsId   int64  // 文档ID
+	try           int    // es 数据同步会有部分延迟，尝试多次
 }
 
 // Index
@@ -63,6 +64,7 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 			DocsIDs:       ids,
 			KnowledgeName: req.KnowledgeName,
 			DocumentsId:   req.DocumentsId,
+			try:           esTryFindDoc,
 		})
 		if err != nil {
 			g.Log().Errorf(ctxN, "indexAsyncByDocsID failed, err=%v", err)
@@ -97,6 +99,7 @@ func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq
 
 	sreq := search.NewRequest()
 	sreq.Query = esQuery
+	sreq.Size = common.Of(1000)
 	resp, err := search.NewSearchFunc(x.client)().
 		Index(x.conf.IndexName).
 		Request(sreq).
@@ -106,6 +109,12 @@ func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq
 	}
 	var docs []*schema.Document
 	var chunks []entity.KnowledgeChunks
+	if len(resp.Hits.Hits) < len(req.DocsIDs) && req.try > 0 {
+		g.Log().Warningf(ctx, "indexAsyncByDocsID Hits < DocsIDs, Hits=%d, DocsIDs=%d", len(resp.Hits.Hits), len(req.DocsIDs))
+		req.try--
+		time.Sleep(time.Second)
+		return x.indexAsyncByDocsID(ctx, req)
+	}
 	for _, hit := range resp.Hits.Hits {
 		doc := &schema.Document{}
 		doc, err = retriever.EsHit2Document(ctx, hit)

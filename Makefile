@@ -7,7 +7,7 @@ all: build
 
 # 构建前端
 build-fe:
-	cd fe && npm install && npm run build
+	cd fe && pnpm install && pnpm run build
 	mkdir -p server/static/fe
 	cp -r fe/dist/* server/static/fe/
 

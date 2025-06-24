@@ -12,12 +12,12 @@
           知识库设置
         </el-button>
       </template>
-      
+
       <div class="setting-content">
         <h4>知识库设置</h4>
         <el-form>
           <el-form-item label="知识库名称">
-            <el-input 
+            <el-input
               v-model="localKnowledgeName"
               placeholder="请输入知识库名称"
               size="small"
@@ -30,8 +30,8 @@
             </el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="saveKnowledgeName">保存</el-button>
-            <el-button @click="popoverVisible = false">取消</el-button>
+            <el-button type="primary" size="small" @click="saveKnowledgeName">保存</el-button>
+            <el-button @click="popoverVisible = false" size="small">取消</el-button>
           </el-form-item>
         </el-form>
       </div>
