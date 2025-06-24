@@ -13,9 +13,9 @@ import {
 import { ElMessage, ElNotification } from 'element-plus';
 import { nextTick, onMounted, reactive, ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
-import KnowledgeSelector from '../components/KnowledgeSelector.vue';
+import KnowledgeSelector from '../../components/KnowledgeSelector.vue';
 import '~/styles/markdown.css';
-import { renderMarkdown } from '~/utils/markdown';
+import { renderMarkdown } from '~/utils/markdown.js';
 
 // 聊天消息列表
 const messages = ref([]);

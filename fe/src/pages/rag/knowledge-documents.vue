@@ -1,29 +1,25 @@
 <script setup>
-import {Document, Search} from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { onMounted, ref } from 'vue'
-import KnowledgeSelector from '../components/KnowledgeSelector.vue'
-import { formatDate, getStatusText, getStatusType } from '../utils/format'
-import request from '../utils/request'
+import { Document, Search } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { formatDate, getStatusText, getStatusType } from '~/utils/format.js'
+import request from '~/utils/request.js'
+import KnowledgeSelector from '../../components/KnowledgeSelector.vue'
 
 const knowledgeSelectorRef = ref(null)
-const selectedKnowledgeBase = ref('')
 const documentsList = ref([])
 const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-const onKnowledgeChange = async () => {
-  selectedKnowledgeBase.value = knowledgeSelectorRef.value.getSelectedKnowledgeId()
-    console.log("selectedKnowledgeBase",selectedKnowledgeBase)
+async function onKnowledgeChange() {
   currentPage.value = 1
   await fetchDocumentsList()
 }
 
-
-const fetchDocumentsList = async () => {
-  if (!selectedKnowledgeBase.value) {
+function fetchDocumentsList() {
+  if (knowledgeSelectorRef.value?.getSelectedKnowledgeId() === '') {
     documentsList.value = []
     total.value = 0
     return
@@ -32,7 +28,7 @@ const fetchDocumentsList = async () => {
 
   request.get('/v1/documents', {
     params: {
-      knowledge_name: selectedKnowledgeBase.value,
+      knowledge_name: knowledgeSelectorRef.value?.getSelectedKnowledgeId(),
       page: currentPage.value,
       size: pageSize.value,
     },
@@ -42,7 +38,6 @@ const fetchDocumentsList = async () => {
       total.value = response.data.total || 0
     })
     .catch((error) => {
-      console.error('获取文档列表失败:', error)
       const errorMessage = error.response?.data?.message || '未知错误'
       ElMessage.error(`获取文档列表失败: ${errorMessage}`)
     })
@@ -69,7 +64,6 @@ function confirmDelete(document) {
       }
       catch (error) {
         if (error !== 'cancel') {
-          console.error('删除失败:', error)
           // 错误消息已由 request 拦截器统一处理
         }
       }
@@ -79,13 +73,13 @@ function confirmDelete(document) {
     })
 }
 
-const handleSizeChange = async (size) => {
+async function handleSizeChange(size) {
   pageSize.value = size
   currentPage.value = 1
   await fetchDocumentsList()
 }
 
-const handleCurrentChange = async (page) => {
+async function handleCurrentChange(page) {
   currentPage.value = page
   await fetchDocumentsList()
 }
@@ -95,11 +89,10 @@ function setDocument(row) {
 }
 
 onMounted(async () => {
-  await knowledgeSelectorRef.value?.fetchKnowledgeBaseList?.()
-  console.log("knowledgeSelectorRef",knowledgeSelectorRef.value.getSelectedKnowledgeId())
-  selectedKnowledgeBase.value = knowledgeSelectorRef.value?.getSelectedKnowledgeId?.() || ''
-  if (selectedKnowledgeBase.value) {
-    await fetchDocumentsList()
+  await knowledgeSelectorRef.value.fetchKnowledgeBaseList?.()
+  // 如果已经有选中的知识库，直接加载文档列表
+  if (knowledgeSelectorRef.value.getSelectedKnowledgeId()) {
+    await onKnowledgeChange()
   }
 })
 </script>

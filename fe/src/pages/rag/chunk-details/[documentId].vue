@@ -5,8 +5,8 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import '~/styles/markdown.css';
 import { formatDate } from '~/utils/format.js';
-import { renderMarkdown } from '~/utils/markdown';
-import request from '~/utils/request';
+import { renderMarkdown } from '~/utils/markdown.js';
+import request from '~/utils/request.js';
 
 const route = useRoute();
 const router = useRouter();

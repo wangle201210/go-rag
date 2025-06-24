@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { InfoFilled, Upload } from '@element-plus/icons-vue'
-import KnowledgeSelector from '../components/KnowledgeSelector.vue'
+import KnowledgeSelector from '../../components/KnowledgeSelector.vue'
 
 const processingInfo = ref(null)
 const indexResult = ref(null)

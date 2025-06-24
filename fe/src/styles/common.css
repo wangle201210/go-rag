@@ -54,7 +54,7 @@
 
 /* 内容文本样式 */
 .content-text {
-  white-space: pre-wrap;
+  white-space: normal;
   word-break: break-word;
   line-height: 1.5;
 }
@@ -62,6 +62,7 @@
 /* 源信息样式 */
 .source-info {
   margin-bottom: 8px;
+  text-align: left;
 }
 
 /* 知识库选择器样式 */

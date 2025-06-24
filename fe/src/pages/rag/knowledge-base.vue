@@ -111,7 +111,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Folder, Plus } from '@element-plus/icons-vue'
-import request from '../utils/request'
+import request from '../../utils/request.js'
 
 // 知识库列表
 const knowledgeBaseList = ref([])

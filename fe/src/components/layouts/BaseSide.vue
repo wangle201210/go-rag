@@ -1,16 +1,25 @@
 <script lang="ts" setup>
-import {
-  ChatDotRound,
-  Files,
-  FolderOpened,
-  Search,
-  Upload,
-} from '@element-plus/icons-vue'
-import { useRoute } from 'vue-router'
+import { getCurrentInstance, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const route = useRoute()
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+const isCollapse = ref(false)
 
-// const isCollapse = ref(true)
+const router = useRouter()
+const route = useRouter().currentRoute
+
+const menuRoutes = router.getRoutes().filter(route => 
+  route.meta?.showInMenu,
+)
+
+// 注册所有图标组件
+const app = getCurrentInstance()
+if (app) {
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.appContext.app.component(key, component)
+  }
+}
+
 function handleOpen(key: string, keyPath: string[]) {
   // eslint-disable-next-line no-console
   console.log(key, keyPath)
@@ -28,70 +37,19 @@ function handleClose(key: string, keyPath: string[]) {
     class="el-menu-vertical-demo"
     @open="handleOpen"
     @close="handleClose"
+    :collapse="isCollapse"
   >
-    <el-menu-item index="/knowledge-base">
+    <el-menu-item
+      v-for="route in menuRoutes"
+      :key="route.path"
+      :index="route.path"
+    >
       <el-icon>
-        <FolderOpened />
+        <component :is="ElementPlusIconsVue[route.meta?.icon as string]" />
       </el-icon>
       <template #title>
-        知识库管理
+        {{ route.meta?.title }}
       </template>
     </el-menu-item>
-    <el-menu-item index="/indexer">
-      <el-icon>
-        <Upload />
-      </el-icon>
-      <template #title>
-        索引管理
-      </template>
-    </el-menu-item>
-    <el-menu-item index="/knowledge-documents">
-      <el-icon>
-        <Files />
-      </el-icon>
-      <template #title>
-        文档管理
-      </template>
-    </el-menu-item>
-    <el-menu-item index="/retriever">
-      <el-icon>
-        <Search />
-      </el-icon>
-      <template #title>
-        文档检索
-      </template>
-    </el-menu-item>
-    <el-menu-item index="/chat">
-      <el-icon>
-        <ChatDotRound />
-      </el-icon>
-      <template #title>
-        智能问答
-      </template>
-    </el-menu-item>
-<!--    <el-sub-menu index="demo">-->
-<!--      <template #title>-->
-<!--        <el-icon>-->
-<!--          <Location />-->
-<!--        </el-icon>-->
-<!--        <span>示例页面</span>-->
-<!--      </template>-->
-<!--      <el-menu-item index="/nav/2">-->
-<!--        <el-icon>-->
-<!--          <IconMenu />-->
-<!--        </el-icon>-->
-<!--        <template #title>-->
-<!--          Navigator Two-->
-<!--        </template>-->
-<!--      </el-menu-item>-->
-<!--      <el-menu-item index="/nav/4">-->
-<!--        <el-icon>-->
-<!--          <Setting />-->
-<!--        </el-icon>-->
-<!--        <template #title>-->
-<!--          Navigator Four-->
-<!--        </template>-->
-<!--      </el-menu-item>-->
-<!--    </el-sub-menu>-->
   </el-menu>
 </template>

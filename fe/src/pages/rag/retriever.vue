@@ -97,8 +97,8 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
-import KnowledgeSelector from '../components/KnowledgeSelector.vue'
-import request from "../utils/request";
+import KnowledgeSelector from '../../components/KnowledgeSelector.vue'
+import request from "../../utils/request.js";
 
 // 配置Marked和代码高亮
 marked.setOptions({
