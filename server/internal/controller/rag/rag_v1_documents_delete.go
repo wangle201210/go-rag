@@ -20,10 +20,10 @@ func (c *ControllerV1) DocumentsDelete(ctx context.Context, req *v1.DocumentsDel
 
 	if len(ChunksList) > 0 {
 		for _, chunk := range ChunksList {
-			if chunk.EsChunkId != "" {
-				err = svr.DeleteDocument(ctx, chunk.EsChunkId)
+			if chunk.ChunkId != "" {
+				err = svr.DeleteDocument(ctx, chunk.ChunkId)
 				if err != nil {
-					g.Log().Errorf(ctx, "DeleteDocumentAndChunks: ES DeleteByQuery failed for docId %v, err: %v", chunk.EsChunkId, err)
+					g.Log().Errorf(ctx, "DeleteDocumentAndChunks: ES DeleteByQuery failed for docId %v, err: %v", chunk.ChunkId, err)
 					return
 				}
 			}

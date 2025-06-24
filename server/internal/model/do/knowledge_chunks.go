@@ -14,7 +14,7 @@ type KnowledgeChunks struct {
 	g.Meta         `orm:"table:knowledge_chunks, do:true"`
 	Id             interface{} //
 	KnowledgeDocId interface{} //
-	EsChunkId      interface{} //
+	ChunkId        interface{} //
 	Content        interface{} //
 	Ext            interface{} //
 	Status         interface{} //

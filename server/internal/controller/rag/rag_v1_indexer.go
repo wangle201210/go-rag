@@ -38,7 +38,7 @@ func (c *ControllerV1) Indexer(ctx context.Context, req *v1.IndexerReq) (res *v1
 	indexReq := &gorag.IndexReq{
 		URI:           uri,
 		KnowledgeName: req.KnowledgeName,
-		DocumentsId:   int(documentsId),
+		DocumentsId:   documentsId,
 	}
 	ids, err := svr.Index(ctx, indexReq)
 	if err != nil {

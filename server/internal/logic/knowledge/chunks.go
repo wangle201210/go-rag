@@ -10,7 +10,7 @@ import (
 )
 
 // SaveChunksData 批量保存知识块数据
-func SaveChunksData(ctx context.Context, documentsId int, chunks []entity.KnowledgeChunks) error {
+func SaveChunksData(ctx context.Context, documentsId int64, chunks []entity.KnowledgeChunks) error {
 	if len(chunks) == 0 {
 		return nil
 	}
@@ -32,8 +32,8 @@ func GetChunksList(ctx context.Context, where entity.KnowledgeChunks, page, size
 	if where.KnowledgeDocId != 0 {
 		model = model.Where("knowledge_doc_id", where.KnowledgeDocId)
 	}
-	if where.EsChunkId != "" {
-		model = model.Where("es_chunk_id", where.EsChunkId)
+	if where.ChunkId != "" {
+		model = model.Where("es_chunk_id", where.ChunkId)
 	}
 
 	// 获取总数
@@ -55,19 +55,19 @@ func GetChunksList(ctx context.Context, where entity.KnowledgeChunks, page, size
 }
 
 // GetChunkById 根据ID查询单个知识块
-func GetChunkById(ctx context.Context, id int) (chunk entity.KnowledgeChunks, err error) {
+func GetChunkById(ctx context.Context, id int64) (chunk entity.KnowledgeChunks, err error) {
 	err = dao.KnowledgeChunks.Ctx(ctx).Where("id", id).Scan(&chunk)
 	return
 }
 
 // DeleteChunkByIds 根据ID软删除知识块
-func DeleteChunkById(ctx context.Context, id int) error {
+func DeleteChunkById(ctx context.Context, id int64) error {
 	_, err := dao.KnowledgeChunks.Ctx(ctx).Where("id", id).Delete()
 	return err
 }
 
 // UpdateChunkById 根据ID更新知识块
-func UpdateChunkByIds(ctx context.Context, ids []int, data entity.KnowledgeChunks) error {
+func UpdateChunkByIds(ctx context.Context, ids []int64, data entity.KnowledgeChunks) error {
 	model := dao.KnowledgeChunks.Ctx(ctx).WhereIn("id", ids)
 	if data.Content != "" {
 		model = model.Data("content", data.Content)
@@ -80,7 +80,7 @@ func UpdateChunkByIds(ctx context.Context, ids []int, data entity.KnowledgeChunk
 }
 
 // GetAllChunksByDocId gets all chunks by document id
-func GetAllChunksByDocId(ctx context.Context, docId int, fields ...string) (list []entity.KnowledgeChunks, err error) {
+func GetAllChunksByDocId(ctx context.Context, docId int64, fields ...string) (list []entity.KnowledgeChunks, err error) {
 	model := dao.KnowledgeChunks.Ctx(ctx).Where("knowledge_doc_id", docId)
 	if len(fields) > 0 {
 		for _, field := range fields {

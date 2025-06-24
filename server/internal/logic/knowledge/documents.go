@@ -33,7 +33,7 @@ func SaveDocumentsInfo(ctx context.Context, documents entity.KnowledgeDocuments)
 }
 
 // UpdateDocumentsStatus 更新文档状态
-func UpdateDocumentsStatus(ctx context.Context, documentsId int, status int) error {
+func UpdateDocumentsStatus(ctx context.Context, documentsId int64, status int) error {
 	data := g.Map{
 		"status": status,
 	}
@@ -47,7 +47,7 @@ func UpdateDocumentsStatus(ctx context.Context, documentsId int, status int) err
 }
 
 // GetDocumentById 根据ID获取文档信息
-func GetDocumentById(ctx context.Context, id int) (document entity.KnowledgeDocuments, err error) {
+func GetDocumentById(ctx context.Context, id int64) (document entity.KnowledgeDocuments, err error) {
 	g.Log().Debugf(ctx, "获取文档信息: ID=%d", id)
 
 	err = dao.KnowledgeDocuments.Ctx(ctx).Where("id", id).Scan(&document)
@@ -99,7 +99,7 @@ func GetDocumentsList(ctx context.Context, where entity.KnowledgeDocuments, page
 }
 
 // DeleteDocument 删除文档及其相关数据
-func DeleteDocument(ctx context.Context, id int) error {
+func DeleteDocument(ctx context.Context, id int64) error {
 	g.Log().Debugf(ctx, "删除文档: ID=%d", id)
 
 	return dao.KnowledgeDocuments.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {

@@ -23,7 +23,7 @@ type KnowledgeChunksDao struct {
 type KnowledgeChunksColumns struct {
 	Id             string //
 	KnowledgeDocId string //
-	EsChunkId      string //
+	ChunkId        string //
 	Content        string //
 	Ext            string //
 	Status         string //
@@ -35,7 +35,7 @@ type KnowledgeChunksColumns struct {
 var knowledgeChunksColumns = KnowledgeChunksColumns{
 	Id:             "id",
 	KnowledgeDocId: "knowledge_doc_id",
-	EsChunkId:      "es_chunk_id",
+	ChunkId:        "chunk_id",
 	Content:        "content",
 	Ext:            "ext",
 	Status:         "status",

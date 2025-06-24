@@ -6,17 +6,7 @@
           <el-icon class="header-icon"><Document /></el-icon>
           <span>文档数据集管理</span>
           <div class="header-actions">
-            <el-select 
-              v-model="selectedKnowledgeBase" 
-              placeholder="请选择知识库" 
-              style="width: 200px;"
-              @change="handleKnowledgeBaseChange">
-              <el-option
-                v-for="kb in knowledgeBaseList"
-                :key="kb.id"
-                :label="kb.name"
-                :value="kb.name" />
-            </el-select>
+            <KnowledgeSelector @change="onKnowledgeChange" ref="knowledgeSelectorRef" />
           </div>
         </div>
       </template>
@@ -109,61 +99,38 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document } from '@element-plus/icons-vue'
+import KnowledgeSelector from '../components/KnowledgeSelector.vue'
 import request from '../utils/request'
 import { getStatusType, getStatusText, formatDate } from '../utils/format'
 
-const KEY_LAST_KB = 'last_selected_kb'
-
-// 知识库列表
-const knowledgeBaseList = ref([])
-// 选中的知识库
+const knowledgeSelectorRef = ref(null)
 const selectedKnowledgeBase = ref('')
-// 文档列表
 const documentsList = ref([])
-// 加载状态
 const loading = ref(false)
-// 分页相关
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-// 页面加载时获取知识库列表
+const onKnowledgeChange = async () => {
+  selectedKnowledgeBase.value = knowledgeSelectorRef.value.getSelectedKnowledgeId()
+  currentPage.value = 1
+  await fetchDocumentsList()
+}
+
 onMounted(async () => {
-  await fetchKnowledgeBaseList()
-  
-  const lastSelectedKB = sessionStorage.getItem(KEY_LAST_KB)
-  if (lastSelectedKB && knowledgeBaseList.value.some(kb => kb.name === lastSelectedKB)) {
-    selectedKnowledgeBase.value = lastSelectedKB
+  await knowledgeSelectorRef.value?.fetchKnowledgeBaseList?.()
+  selectedKnowledgeBase.value = knowledgeSelectorRef.value?.getSelectedKnowledgeId?.() || ''
+  if (selectedKnowledgeBase.value) {
     await fetchDocumentsList()
   }
 })
 
-// 获取知识库列表
-const fetchKnowledgeBaseList = async () => {
-  try {
-    const response = await request.get('/v1/kb')
-    knowledgeBaseList.value = response.data.list || []
-  } catch (error) {
-    console.error('获取知识库列表失败:', error)
-    ElMessage.error('获取知识库列表失败: ' + (error.response?.message || '未知错误'))
-  }
-}
-
-// 知识库选择变化
-const handleKnowledgeBaseChange = () => {
-  currentPage.value = 1
-  fetchDocumentsList()
-  sessionStorage.setItem(KEY_LAST_KB, selectedKnowledgeBase.value)
-}
-
-// 获取文档列表
 const fetchDocumentsList = async () => {
   if (!selectedKnowledgeBase.value) {
     documentsList.value = []
     total.value = 0
     return
   }
-  
   loading.value = true
   try {
     const response = await request.get('/v1/documents', {
@@ -183,7 +150,6 @@ const fetchDocumentsList = async () => {
   }
 }
 
-// 确认删除
 const confirmDelete = async (document) => {
   try {
     await ElMessageBox.confirm(
@@ -195,9 +161,7 @@ const confirmDelete = async (document) => {
         type: 'warning'
       }
     )
-    
     await request.delete('/v1/documents', { params: { document_id: document.id } })
-    
     ElMessage.success(`文档 "${document.fileName}" 删除成功`)
     fetchDocumentsList()
   } catch (error) {
@@ -208,19 +172,16 @@ const confirmDelete = async (document) => {
   }
 }
 
-// 分页大小变化
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
   fetchDocumentsList()
 }
 
-// 当前页变化
 const handleCurrentChange = (page) => {
   currentPage.value = page
   fetchDocumentsList()
 }
-
 </script>
 
 <style scoped>

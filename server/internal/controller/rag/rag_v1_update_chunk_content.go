@@ -30,7 +30,7 @@ func (c *ControllerV1) UpdateChunkContent(ctx context.Context, req *v1.UpdateChu
 
 	knowledgeName := document.KnowledgeBaseName
 
-	err = knowledge.UpdateChunkByIds(ctx, []int{req.Id}, entity.KnowledgeChunks{
+	err = knowledge.UpdateChunkByIds(ctx, []int64{req.Id}, entity.KnowledgeChunks{
 		Content: req.Content,
 	})
 	if err != nil {
@@ -50,7 +50,7 @@ func (c *ControllerV1) UpdateChunkContent(ctx context.Context, req *v1.UpdateChu
 		}()
 
 		doc := &schema.Document{
-			ID:      chunk.EsChunkId,
+			ID:      chunk.ChunkId,
 			Content: req.Content,
 		}
 

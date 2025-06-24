@@ -8,7 +8,7 @@ import (
 type KnowledgeChunks struct {
 	ID             int64     `gorm:"primaryKey;column:id;autoIncrement"`
 	KnowledgeDocID int64     `gorm:"primaryKey;column:knowledge_doc_id;not null;index"`
-	EsChunkID      string    `gorm:"column:es_chunk_id;type:varchar(36);not null;uniqueIndex:uk_es_doc_id"`
+	ChunkID        string    `gorm:"column:chunk_id;type:varchar(36);not null;uniqueIndex:uk_chunk_id"`
 	Content        string    `gorm:"column:content;type:text"`
 	Ext            string    `gorm:"column:ext;type:varchar(1024)"`
 	Status         int8      `gorm:"column:status;type:tinyint(1);not null;default:1"`

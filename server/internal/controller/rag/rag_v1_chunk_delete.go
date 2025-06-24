@@ -18,9 +18,9 @@ func (c *ControllerV1) ChunkDelete(ctx context.Context, req *v1.ChunkDeleteReq) 
 		return
 	}
 
-	err = svr.DeleteDocument(ctx, chunk.EsChunkId)
+	err = svr.DeleteDocument(ctx, chunk.ChunkId)
 	if err != nil {
-		g.Log().Errorf(ctx, "DeleteDocumentAndChunks: ES DeleteByQuery failed for docId %v, err: %v", chunk.EsChunkId, err)
+		g.Log().Errorf(ctx, "DeleteDocumentAndChunks: ES DeleteByQuery failed for docId %v, err: %v", chunk.ChunkId, err)
 		return
 	}
 

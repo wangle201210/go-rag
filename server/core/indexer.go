@@ -21,19 +21,19 @@ import (
 type IndexReq struct {
 	URI           string // 文档地址，可以是文件路径（pdf，html，md等），也可以是网址
 	KnowledgeName string // 知识库名称
-	DocumentsId   int    // 文档ID
+	DocumentsId   int64  // 文档ID
 }
 
 type IndexAsyncReq struct {
 	Docs          []*schema.Document
 	KnowledgeName string // 知识库名称
-	DocumentsId   int    // 文档ID
+	DocumentsId   int64  // 文档ID
 }
 
 type IndexAsyncByDocsIDReq struct {
 	DocsIDs       []string
 	KnowledgeName string // 知识库名称
-	DocumentsId   int    // 文档ID
+	DocumentsId   int64  // 文档ID
 }
 
 // Index
@@ -123,7 +123,7 @@ func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq
 		}
 		chunks = append(chunks, entity.KnowledgeChunks{
 			KnowledgeDocId: req.DocumentsId,
-			EsChunkId:      doc.ID,
+			ChunkId:        doc.ID,
 			Content:        doc.Content,
 			Ext:            string(ext),
 		})
