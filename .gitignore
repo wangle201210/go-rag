@@ -36,3 +36,4 @@ server/manifest/config/config.yaml
 /data/
 /server/manifest/config/config-docker.yaml
 /server/manifest/config/frpc.toml
+/fe/src/components.d.ts
