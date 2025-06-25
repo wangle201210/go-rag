@@ -1,0 +1,314 @@
+/* 公共页面样式 */
+
+/* 容器样式 */
+.page-container {
+  margin: 10px;
+}
+
+/* 卡片头部样式 */
+.card-header {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.header-icon {
+  margin-right: 8px;
+  font-size: 18px;
+  color: #409eff;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 分页样式 */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 空状态样式 */
+.empty-state {
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-icon {
+  font-size: 60px;
+  color: #909399;
+}
+
+/* 内容文本样式 */
+.content-text {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* 源信息样式 */
+.source-info {
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+/* 知识库选择器样式 */
+.knowledge-selector {
+  margin-right: 10px;
+}
+
+.knowledge-selector-container {
+  margin-bottom: 20px;
+}
+
+/* 文件信息样式 */
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-icon {
+  color: #409eff;
+}
+
+.file-name {
+  font-weight: 500;
+}
+
+/* 消息样式 */
+.message-text {
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 5px;
+}
+
+/* 标签样式 */
+.label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* 通用Markdown内容样式 */
+.markdown-content {
+  text-align: left;
+}
+
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3),
+.markdown-content :deep(h4),
+.markdown-content :deep(h5),
+.markdown-content :deep(h6) {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-content :deep(h1) {
+  font-size: 1.5em;
+}
+
+.markdown-content :deep(h2) {
+  font-size: 1.3em;
+}
+
+.markdown-content :deep(h3) {
+  font-size: 1.2em;
+}
+
+.markdown-content :deep(p) {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.markdown-content :deep(pre) {
+  padding: 12px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+.markdown-content :deep(code) {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+}
+
+.markdown-content :deep(pre code) {
+  padding: 0;
+  background-color: transparent;
+}
+
+.markdown-content :deep(blockquote) {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5;
+  margin-bottom: 10px;
+}
+
+.markdown-content :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.markdown-content :deep(th),
+.markdown-content :deep(td) {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+
+.markdown-content :deep(tr:nth-child(2n)) {
+  background-color: #f6f8fa;
+}
+
+/* 对话框底部样式 */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 输入操作样式 */
+.input-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* 设置面板样式 */
+.settings-panel {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: var(--el-color-info-light-9);
+  border-radius: 8px;
+}
+
+/* 会话信息样式 */
+.session-info {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: var(--el-color-info-light-9);
+  border-radius: 8px;
+}
+
+.session-id, .message-count {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.session-id:last-child, .message-count:last-child {
+  margin-bottom: 0;
+}
+
+/* 编辑操作样式 */
+.edit-actions {
+  width: 100%;
+}
+
+/* 加载消息样式 */
+.loading-message {
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 8px;
+  margin: 10px 0;
+  border: 1px solid #ebeef5;
+}
+
+/* 结果区域样式 */
+.result-header {
+  margin: 20px 0;
+}
+
+.result-content {
+  padding: 10px 0;
+}
+
+.content-card {
+  background-color: #f9f9f9;
+}
+
+.empty-result {
+  padding: 40px 0;
+}
+
+/* 搜索区域样式 */
+.search-area {
+  margin-bottom: 20px;
+}
+
+/* 上传区域样式 */
+.upload-area {
+  padding: 20px;
+}
+
+.upload-component {
+  width: 100%;
+}
+
+.process-info {
+  margin-top: 20px;
+}
+
+/* 页面头部样式 */
+.page-header {
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+/* 卡片样式 */
+.card {
+  margin-bottom: 20px;
+}
+
+/* 引用内容样式 */
+.reference-content {
+  padding: 8px;
+}
+
+.reference-list {
+  margin-top: 12px;
+}
+
+.references-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty-references {
+  padding: 20px;
+  text-align: center;
+}

@@ -3,7 +3,6 @@
 1. 创建知识库
    ![](./server/static/kb.png)
 2. 选择需要使用的知识库，上传文档
-   ![](./server/static/kb-select.png)
    ![](./server/static/indexer.png)
 3. 文档列表 & chunk 编辑
    ![](./server/static/doc-list.png)
@@ -110,3 +109,9 @@ npm run dev
 
 - 清理构建产物 `make clean`
 
+## 联系方式
+
+> 如果使用上遇到什么问题，欢迎加微信交流（尽量使用github issue 交流）
+- 参与项目开发备注：go-rag 开发
+- 问题咨询备注：go-rag 咨询
+![微信](./server/static/wx.jpg)

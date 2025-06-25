@@ -27,12 +27,14 @@ go.work.sum
 
 server/manifest/config/config.yaml
 /server/uploads/
-/node_modules/
-/fe/package-lock.json
+**/package-lock.json
 /server/static/fe/
-/fe/.vite
+**/.vite
 /server/go-rag-server
 /server/logs/
 /data/
 /server/manifest/config/config-docker.yaml
 /server/manifest/config/frpc.toml
+**/node_modules/
+**/dist/
+**/build/

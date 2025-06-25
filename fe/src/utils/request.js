@@ -48,23 +48,24 @@ request.interceptors.response.use(
       case 401:
         // 未授权，清除token并跳转到登录页
         localStorage.removeItem('token')
-        // router.push('/login')
+        ElMessage.error('登录已过期，请重新登录')
+        // 这里可以添加跳转到登录页的逻辑
         break
       case 403:
-        ElMessage.error('没有权限访问该资源')
+        ElMessage.error('没有权限访问')
         break
       case 404:
         ElMessage.error('请求的资源不存在')
         break
       case 500:
-        ElMessage.error('服务器错误')
+        ElMessage.error('服务器内部错误')
         break
       default:
-        ElMessage.error(error.response?.data?.message || error.message || '请求失败')
+        ElMessage.error(error.message || '网络错误')
     }
     
     return Promise.reject(error)
   }
 )
 
-export default request 
+export default request
