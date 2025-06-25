@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import {
   ChatDotRound,
   ChatRound,
@@ -9,83 +9,93 @@ import {
   Service,
   Setting,
   User,
-} from '@element-plus/icons-vue';
-import { ElMessage, ElNotification } from 'element-plus';
-import { nextTick, onMounted, reactive, ref } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
-import KnowledgeSelector from '../../components/KnowledgeSelector.vue';
-import '~/styles/markdown.css';
-import { renderMarkdown } from '~/utils/markdown.js';
+} from '@element-plus/icons-vue'
+import { ElMessage, ElNotification } from 'element-plus'
+import { v4 as uuidv4 } from 'uuid'
+import { nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import KnowledgeSelector from '~/components/KnowledgeSelector.vue'
+import { renderMarkdown } from '~/utils/markdown.js'
+import '~/styles/markdown.css'
 
-// 聊天消息列表
-const messages = ref([]);
-// 输入框消息
-const inputMessage = ref('');
-// 加载状态
-const loading = ref(false);
-// 消息容器引用
-const messagesContainer = ref(null);
-// 会话ID
-const sessionId = ref(uuidv4());
-// 知识库选择器引用
-const knowledgeSelectorRef = ref(null);
-// 参考文档
-const references = ref([]);
-// 显示设置面板
-const showSettings = ref(false);
-// 当前正在流式传输的消息
-const currentStreamingMessage = ref('');
-// 是否正在流式传输中
-const isStreaming = ref(false);
+const _router = useRouter()
 
-// 聊天设置
-const chatSettings = reactive({
-  top_k: 3,
-  score: 0.5,
-});
+interface Message {
+  role: string
+  content: string
+  timestamp: Date
+}
+
+interface ChatSettings {
+  top_k: number
+  score: number
+}
+
+const sessionId = ref('')
+
+const messages = ref<Message[]>([])
+
+const currentMessage = ref('')
+
+const isStreaming = ref(false)
+
+const currentStreamingMessage = ref('')
+
+const references = ref<any[]>([])
+
+const knowledgeSelectorRef = ref<any>(null)
+
+const chatSettings = ref<ChatSettings>({
+  top_k: 5,
+  score: 0.2,
+})
+
+const messagesContainer = ref<HTMLElement | null>(null)
+
+const loading = ref(false)
+const _inputMessage = ref('')
+const showSettings = ref(false)
 
 function scrollToBottom() {
   if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
 }
 
-// 发送消息
+function generateSessionId() {
+  sessionId.value = uuidv4()
+}
+
 async function sendMessage() {
-  const message = inputMessage.value.trim();
-  if (!message || loading.value) {
-    return;
+  if (!currentMessage.value.trim() || isStreaming.value) {
+    return
   }
+
+  const message = currentMessage.value.trim()
+  currentMessage.value = ''
+  references.value = []
 
   // 添加用户消息
   messages.value.push({
     role: 'user',
     content: message,
     timestamp: new Date(),
-  });
+  })
 
-  // 清空输入框
-  inputMessage.value = '';
-
-  // 设置加载状态
-  loading.value = true;
-  currentStreamingMessage.value = '';
-  isStreaming.value = true;
-
-  // 添加AI消息占位
+  // 添加空的AI回复消息
   messages.value.push({
     role: 'assistant',
     content: '',
     timestamp: new Date(),
-  });
+  })
 
-  // 滚动到底部
-  await nextTick();
-  scrollToBottom();
+  isStreaming.value = true
+  currentStreamingMessage.value = ''
+
+  await nextTick()
+  scrollToBottom()
 
   try {
-    // 使用fetch API进行流式请求
-    references.value = [];
     const response = await fetch('/api/v1/chat/stream', {
       method: 'POST',
       headers: {
@@ -93,92 +103,138 @@ async function sendMessage() {
       },
       body: JSON.stringify({
         question: message,
-        top_k: chatSettings.top_k,
-        score: chatSettings.score,
+        top_k: chatSettings.value.top_k,
+        score: chatSettings.value.score,
         conv_id: sessionId.value,
         knowledge_name: knowledgeSelectorRef.value?.getSelectedKnowledgeId() || '',
       }),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = '' // 用于累积不完整的数据
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const { value, done } = await reader.read();
+      const { value, done } = await reader.read()
 
       if (done) {
-        break;
+        // 处理最后剩余的数据
+        if (buffer.trim()) {
+          processLines([buffer])
+        }
+        break
       }
 
-      // 解码数据
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
+      // 解码数据并添加到缓冲区
+      const chunk = decoder.decode(value, { stream: true })
+      buffer += chunk
 
+      // 按行分割，保留最后一个可能不完整的行
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || '' // 保留最后一个可能不完整的行
+
+      // 处理完整的行
+      processLines(lines)
+    }
+
+    // 处理行数据的函数
+    function processLines(lines: string[]) {
       for (const line of lines) {
         if (line.startsWith('data:')) {
-          const data = line.slice(5).trim();
+          const data = line.slice(5).trim()
           if (data === '[DONE]') {
             // 流结束
-            isStreaming.value = false;
+            isStreaming.value = false
             // 确保最后一次完整渲染
-            messages.value[messages.value.length - 1].content = currentStreamingMessage.value;
-            await nextTick();
-            scrollToBottom();
-            break;
+            messages.value[messages.value.length - 1].content = currentStreamingMessage.value
+            nextTick().then(() => scrollToBottom())
+            return
           }
 
           try {
-            const parsedData = JSON.parse(data);
+            const parsedData = JSON.parse(data)
             if (parsedData.content) {
-              currentStreamingMessage.value += parsedData.content;
+              currentStreamingMessage.value += parsedData.content
               // 更新最后一条消息的内容
-              messages.value[messages.value.length - 1].content = currentStreamingMessage.value;
-              await nextTick();
-              scrollToBottom();
+              messages.value[messages.value.length - 1].content = currentStreamingMessage.value
+              nextTick().then(() => scrollToBottom())
             }
-          } catch (e) {
+          }
+          catch (e) {
             // eslint-disable-next-line no-console
-            console.error('解析流数据失败:', e);
+            console.error('解析流数据失败:', line, '<===>', line.slice(5).trim(), '<===>', e)
           }
         }
 
         if (line.startsWith('documents:')) {
-          const data = line.slice(10).trim();
+          const data = line.slice(10).trim()
 
           try {
-            const parsedData = JSON.parse(data);
+            const parsedData = JSON.parse(data)
             if (parsedData.document) {
-              references.value.push(...parsedData.document);
+              references.value.push(...parsedData.document)
               // eslint-disable-next-line no-console
-              console.log('references', references.value);
+              // console.log('references', references.value)
             }
-          } catch (e) {
+          }
+          catch (e) {
             // eslint-disable-next-line no-console
-            console.error('解析流数据失败:', e);
+            console.error('解析流数据失败:', line.slice(10).trim(), e)
           }
         }
       }
     }
-  } catch (error) {
+  }
+  catch (error) {
     // eslint-disable-next-line no-console
-    console.error('发送消息失败:', error);
+    console.error('发送消息失败:', error)
     ElNotification({
       title: '错误',
       message: '发送消息失败，请稍后重试',
       type: 'error',
-    });
+    })
 
     // 移除最后一条消息（AI回复）
     if (messages.value.length > 0 && messages.value[messages.value.length - 1].role === 'assistant') {
-      messages.value.pop();
+      messages.value.pop()
     }
-  } finally {
-    loading.value = false;
+  }
+  finally {
+    isStreaming.value = false
+  }
+}
+
+const clearChat = () => {
+  messages.value = []
+  references.value = []
+  generateSessionId()
+}
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault()
+    sendMessage()
+  }
+}
+
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text)
+    ElMessage({
+      message: '已复制到剪贴板',
+      type: 'success',
+    })
+  }
+  catch (err) {
+    ElMessage({
+      message: '复制失败',
+      type: 'error',
+    })
   }
 }
 
@@ -186,8 +242,8 @@ async function sendMessage() {
 function handleKeyDown(e) {
   // 只有在按下Enter键且没有同时按下Shift键时才发送消息
   if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault(); // 阻止默认行为
-    sendMessage();
+    e.preventDefault() // 阻止默认行为
+    sendMessageOld()
   }
 }
 
@@ -197,41 +253,87 @@ function startNewSession() {
     ElMessage({
       message: '已开始新的会话',
       type: 'success',
-    });
+    })
   }
 
-  messages.value = [];
-  references.value = [];
-  sessionId.value = uuidv4();
+  messages.value = []
+  references.value = []
+  sessionId.value = uuidv4()
 }
 
 // 复制会话ID
 function copySessionId() {
-  navigator.clipboard.writeText(sessionId.value)
-    .then(() => {
+  // 检查是否支持 Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(sessionId.value)
+      .then(() => {
+        ElMessage({
+          message: '会话ID已复制到剪贴板',
+          type: 'success',
+        })
+      })
+      .catch(() => {
+        fallbackCopyToClipboard(sessionId.value)
+      })
+  } else {
+    // 降级方案：使用传统的复制方法
+    fallbackCopyToClipboard(sessionId.value)
+  }
+}
+
+// 降级复制方案
+function fallbackCopyToClipboard(text) {
+  try {
+    // 创建一个临时的 textarea 元素
+    const textArea = document.createElement('textarea')
+    textArea.value = text
+    textArea.style.position = 'fixed'
+    textArea.style.left = '-999999px'
+    textArea.style.top = '-999999px'
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+    
+    // 尝试执行复制命令
+    const successful = document.execCommand('copy')
+    document.body.removeChild(textArea)
+    
+    if (successful) {
       ElMessage({
         message: '会话ID已复制到剪贴板',
         type: 'success',
-      });
+      })
+    } else {
+      throw new Error('复制命令执行失败')
+    }
+  } catch (err) {
+    ElMessage({
+      message: '复制失败，请手动复制会话ID: ' + text,
+      type: 'error',
     })
-    .catch(() => {
-      ElMessage({
-        message: '复制失败，请手动复制',
-        type: 'error',
-      });
-    });
+  }
 }
 
 // 格式化时间
 function formatTime(timestamp) {
-  const date = new Date(timestamp);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
+
+watch(
+  () => messages.value.length,
+  () => {
+    nextTick(() => {
+      scrollToBottom()
+    })
+  },
+)
 
 // 组件挂载后滚动到底部
 onMounted(() => {
-  scrollToBottom();
-});
+  generateSessionId()
+  scrollToBottom()
+})
 </script>
 
 <template>
@@ -293,12 +395,12 @@ onMounted(() => {
           <div class="chat-input">
             <el-form @submit.prevent="sendMessage">
               <el-input
-                v-model="inputMessage"
+                v-model="currentMessage"
                 type="textarea"
                 :rows="3"
                 placeholder="请输入您的问题..."
-                :disabled="loading"
-                @keydown="handleKeyDown"
+                :disabled="isStreaming"
+                @keydown="handleKeydown"
               />
               <div class="input-actions">
                 <el-tooltip content="高级设置" placement="top">
@@ -313,8 +415,8 @@ onMounted(() => {
                 </el-tooltip>
                 <el-button
                   type="primary"
-                  :loading="loading"
-                  :disabled="!inputMessage.trim()"
+                  :loading="isStreaming"
+                  :disabled="!currentMessage.trim()"
                   @click="sendMessage"
                 >
                   发送 <el-icon class="el-icon--right"><Position /></el-icon>
@@ -515,12 +617,10 @@ onMounted(() => {
 /* 为最后一条AI消息添加光标效果，但仅在流式传输时显示 */
 .ai-message:last-child .message-text:after {
   content: '|';
-  display: inline-block;
+  display: v-bind(isStreaming ? 'inline-block' : 'none');
   color: var(--el-color-primary);
   animation: cursor-blink 0.8s infinite;
   font-weight: bold;
   margin-left: 2px;
-  /* 仅在流式传输时显示光标 */
-  display: v-bind(isStreaming ? 'inline-block' : 'none');
 }
 </style>
