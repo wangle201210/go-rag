@@ -9,13 +9,26 @@ const indexResult = ref(null)
 const knowledgeSelectorRef = ref(null)
 
 function beforeUpload(file) {
-  // 检查文件类型
-  // const allowedTypes = ['application/pdf', 'text/markdown', 'text/html', 'text/plain']
-  const allowedTypes = ['text/markdown', 'text/html', 'text/plain']
-  const isAllowed = allowedTypes.includes(file.type)
-
-  if (!isAllowed) {
-    ElMessage.error('只支持 Markdown、HTML 和文本文件!')
+  // 检查文件类型 - 支持更多格式
+  const allowedTypes = [
+    'application/pdf', 
+    'text/markdown', 
+    'text/html', 
+    'text/plain',
+    'text/csv',
+    'application/json',
+    'application/vnd.ms-excel', // CSV的另一种MIME类型
+  ]
+  
+  // 检查文件扩展名
+  const allowedExtensions = ['.pdf', '.md', '.markdown', '.html', '.htm', '.txt', '.csv', '.json']
+  const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
+  
+  const isAllowedType = allowedTypes.includes(file.type)
+  const isAllowedExtension = allowedExtensions.includes(fileExtension)
+  
+  if (!isAllowedType && !isAllowedExtension) {
+    ElMessage.error('支持的文件格式：PDF、Markdown、HTML、TXT、CSV、JSON文件!')
     return false
   }
 
@@ -102,7 +115,7 @@ onMounted(() => {
           </div>
           <template #tip>
             <div class="el-upload__tip">
-              支持上传 PDF、Markdown、HTML 等文档文件
+              支持上传 PDF、Markdown、HTML、TXT、CSV、JSON 等文档文件
             </div>
           </template>
         </el-upload>
