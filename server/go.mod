@@ -22,7 +22,6 @@ require (
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.9.0
 	github.com/gogf/gf/v2 v2.9.0
 	github.com/google/uuid v1.6.0
-	github.com/stretchr/testify v1.10.0
 	github.com/wangle201210/chat-history v0.0.0-20250402104704-5eec15d5419e
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
@@ -37,7 +36,6 @@ require (
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250610035057-2c4e7c8488a5 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dslipak/pdf v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elastic/elastic-transport-go/v8 v8.7.0 // indirect
@@ -77,7 +75,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/slongfield/pyfmt v0.0.0-20220222012616-ea85ff4c361f // indirect

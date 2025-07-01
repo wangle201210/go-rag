@@ -16,12 +16,12 @@ function beforeUpload(file) {
     'text/html', 
     'text/plain',
     'text/csv',
-    'application/json',
-    'application/vnd.ms-excel', // CSV的另一种MIME类型
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ]
   
   // 检查文件扩展名
-  const allowedExtensions = ['.pdf', '.md', '.markdown', '.html', '.htm', '.txt', '.csv', '.json']
+  const allowedExtensions = ['.pdf', '.md', '.markdown', '.html', '.htm', '.txt', '.csv', '.json', '.xlsx']
   const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
   
   const isAllowedType = allowedTypes.includes(file.type)

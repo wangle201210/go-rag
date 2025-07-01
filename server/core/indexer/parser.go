@@ -32,6 +32,7 @@ func (p *EnhancedTextParser) Parse(ctx context.Context, reader io.Reader, opts .
 	for _, doc := range docs {
 		// 清理和标准化文本内容
 		doc.Content = p.cleanAndNormalizeText(doc.Content)
+		g.Log().Debugf(ctx, "enhanced text parser doc Content: %+v", doc.Content)
 	}
 
 	return docs, nil
@@ -90,7 +91,8 @@ func (p *MarkdownParser) Parse(ctx context.Context, reader io.Reader, opts ...pa
 	for _, doc := range docs {
 		splitter, err := markdown.NewHeaderSplitter(ctx, &markdown.HeaderConfig{
 			Headers: map[string]string{
-				"##": "headerNameOfLevel2",
+				"##":  "headerNameOfLevel2",
+				"###": "headerNameOfLevel3",
 			},
 		})
 		if err != nil {
@@ -106,11 +108,10 @@ func (p *MarkdownParser) Parse(ctx context.Context, reader io.Reader, opts ...pa
 			return nil, err
 		}
 
-		g.Log().Infof(ctx, "content: %+v", content)
-
 		for _, c := range content {
 			doc.Content += c.Content
 		}
+		g.Log().Debugf(ctx, "markdown parser doc Content: %+v", doc.Content)
 	}
 
 	return docs, nil
@@ -127,142 +128,140 @@ type XlsxSheetChunk struct {
 	Meta      map[string]interface{}
 }
 
-// splitCsvToChunks 解析 csv 内容为单 sheet chunk
-func splitCsvToChunks(content string) XlsxSheetChunk {
-	lines := strings.Split(content, "\n")
-	if len(lines) == 0 {
-		return XlsxSheetChunk{}
+// XlsxParser xlsx 文件解析器（使用 eino-ext 官方库）
+type XlsxParser struct {
+	parser.Parser
+}
+
+// NewXlsxParser 创建 xlsx 解析器
+func NewXlsxParser(ctx context.Context) (*XlsxParser, error) {
+	p := &parser.TextParser{}
+	return &XlsxParser{Parser: p}, nil
+}
+
+// Parse 重写 Parse 方法，增加后处理
+func (p *XlsxParser) Parse(ctx context.Context, reader io.Reader, opts ...parser.Option) ([]*schema.Document, error) {
+	docs, err := p.Parser.Parse(ctx, reader, opts...)
+	if err != nil {
+		return nil, err
 	}
-	var headers []string
+
+	for _, doc := range docs {
+		var rows [][]string
+		if err := json.Unmarshal([]byte(doc.Content), &rows); err != nil {
+			var parsed struct {
+				Sheets []struct {
+					Name string     `json:"name"`
+					Data [][]string `json:"data"`
+				} `json:"sheets"`
+			}
+			if err := json.Unmarshal([]byte(doc.Content), &parsed); err == nil {
+				for _, sheet := range parsed.Sheets {
+					if len(sheet.Data) > 0 {
+						rows = sheet.Data
+						break
+					}
+				}
+			}
+		}
+
+		if len(rows) > 0 {
+			headers := rows[0]
+			dataRows := rows[1:]
+
+			chunkMeta := map[string]interface{}{
+				"headers":  headers,
+				"rowCount": len(dataRows),
+				"colCount": len(headers),
+				"rows":     dataRows,
+			}
+
+			content, err := json.Marshal(chunkMeta)
+			if err != nil {
+				return nil, err
+			}
+			doc.Content = string(content)
+		}
+		g.Log().Debugf(ctx, "xlsx parser doc Content: %+v", doc.Content)
+	}
+
+	return docs, nil
+}
+
+// CSVParser CSV文件解析器（结构化处理）
+type CSVParser struct {
+	parser.Parser
+}
+
+// NewCSVParser 创建 CSV 解析器
+func NewCSVParser(ctx context.Context) (*CSVParser, error) {
+	p := &parser.TextParser{}
+	return &CSVParser{Parser: p}, nil
+}
+
+// Parse 重写 Parse 方法，增加 CSV 特定处理
+func (p *CSVParser) Parse(ctx context.Context, reader io.Reader, opts ...parser.Option) ([]*schema.Document, error) {
+	docs, err := p.Parser.Parse(ctx, reader, opts...)
+	if err != nil {
+		return nil, err
+	}
+	for _, doc := range docs {
+		rows := parseCSVContent(doc.Content)
+
+		if len(rows) > 0 {
+			headers := rows[0]
+			dataRows := rows[1:]
+
+			chunkMeta := map[string]interface{}{
+				"headers":  headers,
+				"rowCount": len(dataRows),
+				"colCount": len(headers),
+				"rows":     dataRows,
+			}
+
+			content, err := json.Marshal(chunkMeta)
+			if err != nil {
+				return nil, err
+			}
+			doc.Content = string(content)
+		}
+		g.Log().Infof(ctx, "csv parser doc Content: %+v", doc.Content)
+	}
+
+	return docs, nil
+}
+
+// parseCSVContent 解析 CSV 内容为行列结构
+func parseCSVContent(content string) [][]string {
+	lines := strings.Split(content, "\n")
 	var rows [][]string
-	for i, line := range lines {
+	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		cols := splitCsvLine(line)
-		if i == 0 {
-			headers = cols
-		} else {
-			rows = append(rows, cols)
+		var row []string
+		for _, cell := range strings.Split(line, ",") {
+			row = append(row, strings.Trim(cell, `"`))
 		}
+		rows = append(rows, row)
 	}
-	return XlsxSheetChunk{
-		Headers:  headers,
-		Rows:     rows,
-		StartRow: 2,
-		EndRow:   len(rows) + 1,
-		ColCount: len(headers),
-		Meta:     map[string]interface{}{},
-	}
-}
-
-// splitCsvLine 简单分割 csv 行（不处理转义）
-func splitCsvLine(line string) []string {
-	parts := strings.Split(line, ",")
-	for i, p := range parts {
-		parts[i] = strings.Trim(p, `"`)
-	}
-	return parts
-}
-
-// XlsxParser xlsx 文件解析器（结构化输出）
-type XlsxParser struct {
-	parser.TextParser
-}
-
-// Parse xlsx 解析方法
-func (p *XlsxParser) Parse(ctx context.Context, reader io.Reader, opts ...parser.Option) ([]*schema.Document, error) {
-	docs, err := p.TextParser.Parse(ctx, reader, opts...)
-	if err != nil {
-		return nil, err
-	}
-	for _, doc := range docs {
-		var parsed struct {
-			Sheets []struct {
-				Name string     `json:"name"`
-				Data [][]string `json:"data"`
-			} `json:"sheets"`
-		}
-		err := json.Unmarshal([]byte(doc.Content), &parsed)
-		if err != nil {
-			continue
-		}
-		var chunks []*XlsxSheetChunk
-		for _, sheet := range parsed.Sheets {
-			if len(sheet.Data) == 0 {
-				continue
-			}
-			headers := sheet.Data[0]
-			rows := sheet.Data[1:]
-			chunk := &XlsxSheetChunk{
-				SheetName: sheet.Name,
-				Headers:   headers,
-				Rows:      rows,
-				StartRow:  2,
-				EndRow:    len(rows) + 1,
-				ColCount:  len(headers),
-				Meta:      map[string]interface{}{},
-			}
-			chunks = append(chunks, chunk)
-		}
-		chunkMetas := make([]map[string]interface{}, 0, len(chunks))
-		for _, c := range chunks {
-			chunkMetas = append(chunkMetas, map[string]interface{}{
-				"sheet":    c.SheetName,
-				"headers":  c.Headers,
-				"rowCount": len(c.Rows),
-				"colCount": c.ColCount,
-				"startRow": c.StartRow,
-				"endRow":   c.EndRow,
-				"rows":     c.Rows,
-			})
-		}
-		content, err := json.Marshal(chunkMetas)
-		if err != nil {
-			return nil, err
-		}
-		doc.Content = string(content)
-	}
-	return docs, nil
-}
-
-// CSVParser CSV文件解析器（结构化输出，兼容 xlsx）
-type CSVParser struct {
-	parser.TextParser
-}
-
-// Parse CSV解析方法
-func (p *CSVParser) Parse(ctx context.Context, reader io.Reader, opts ...parser.Option) ([]*schema.Document, error) {
-	docs, err := p.TextParser.Parse(ctx, reader, opts...)
-	if err != nil {
-		return nil, err
-	}
-	for _, doc := range docs {
-		chunks := splitCsvToChunks(doc.Content)
-		chunkMetas := map[string]interface{}{
-			"headers":  chunks.Headers,
-			"rowCount": len(chunks.Rows),
-			"colCount": chunks.ColCount,
-			"startRow": chunks.StartRow,
-			"endRow":   chunks.EndRow,
-			"rows":     chunks.Rows,
-		}
-		content, err := json.Marshal(chunkMetas)
-		if err != nil {
-			return nil, err
-		}
-		doc.Content = string(content)
-	}
-	return docs, nil
+	return rows
 }
 
 func newParser(ctx context.Context) (p parser.Parser, err error) {
-	// 创建各种解析器实例
 	enhancedTextParser := &EnhancedTextParser{}
 	markdownParser := &MarkdownParser{}
-	csvParser := &CSVParser{}
 
-	// 创建HTML解析器
+	xlsxParser, err := NewXlsxParser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	csvParser, err := NewCSVParser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	htmlParser, err := html.NewParser(ctx, &html.Config{
 		Selector: common.Of("body"),
 	})
@@ -270,24 +269,22 @@ func newParser(ctx context.Context) (p parser.Parser, err error) {
 		return nil, err
 	}
 
-	// 创建PDF解析器
 	pdfParser, err := pdf.NewPDFParser(ctx, &pdf.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	// 创建解析器
 	p, err = parser.NewExtParser(ctx, &parser.ExtParserConfig{
-		// 注册特定扩展名的解析器
 		Parsers: map[string]parser.Parser{
 			".html": htmlParser,
 			".pdf":  pdfParser,
 			".md":   markdownParser,
 			".csv":  csvParser,
+			".xlsx": xlsxParser,
+			".xls":  xlsxParser,
 			".txt":  enhancedTextParser,
 			".text": enhancedTextParser,
 		},
-		// 设置默认解析器，用于处理未知格式
 		FallbackParser: enhancedTextParser,
 	})
 	if err != nil {
