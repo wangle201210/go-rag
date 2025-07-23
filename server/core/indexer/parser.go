@@ -1,7 +1,9 @@
 package indexer
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"io"
 	"strings"
@@ -13,6 +15,7 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag/server/core/common"
+	"github.com/xuri/excelize/v2"
 )
 
 // EnhancedTextParser 增强的文本解析器
@@ -128,7 +131,7 @@ type XlsxSheetChunk struct {
 	Meta      map[string]interface{}
 }
 
-// XlsxParser xlsx 文件解析器（使用 eino-ext 官方库）
+// XlsxParser xlsx 文件解析器（使用 excelize 库）
 type XlsxParser struct {
 	parser.Parser
 }
@@ -139,53 +142,87 @@ func NewXlsxParser(ctx context.Context) (*XlsxParser, error) {
 	return &XlsxParser{Parser: p}, nil
 }
 
-// Parse 重写 Parse 方法，增加后处理
+// Parse 重写 Parse 方法，使用 excelize 库解析所有工作表
 func (p *XlsxParser) Parse(ctx context.Context, reader io.Reader, opts ...parser.Option) ([]*schema.Document, error) {
-	docs, err := p.Parser.Parse(ctx, reader, opts...)
+	// 读取整个文件内容到内存
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, doc := range docs {
-		var rows [][]string
-		if err := json.Unmarshal([]byte(doc.Content), &rows); err != nil {
-			var parsed struct {
-				Sheets []struct {
-					Name string     `json:"name"`
-					Data [][]string `json:"data"`
-				} `json:"sheets"`
-			}
-			if err := json.Unmarshal([]byte(doc.Content), &parsed); err == nil {
-				for _, sheet := range parsed.Sheets {
-					if len(sheet.Data) > 0 {
-						rows = sheet.Data
-						break
-					}
-				}
-			}
+	// 使用 excelize 打开 Excel 文件
+	f, err := excelize.OpenReader(bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	// 获取所有工作表
+	sheetList := f.GetSheetList()
+	g.Log().Debugf(ctx, "xlsx parser found sheets: %v", sheetList)
+
+	var documents []*schema.Document
+
+	// 遍历所有工作表
+	for _, sheetName := range sheetList {
+		// 获取当前工作表的所有单元格
+		rows, err := f.GetRows(sheetName)
+		if err != nil {
+			g.Log().Warningf(ctx, "failed to get rows from sheet %s: %v", sheetName, err)
+			continue
 		}
 
-		if len(rows) > 0 {
-			headers := rows[0]
-			dataRows := rows[1:]
+		// 跳过空工作表
+		if len(rows) == 0 {
+			continue
+		}
 
-			chunkMeta := map[string]interface{}{
-				"headers":  headers,
+		// 提取表头和数据行
+		headers := rows[0]
+		dataRows := rows[1:]
+
+		// 创建工作表元数据
+		sheetData := XlsxSheetChunk{
+			SheetName: sheetName,
+			Headers:   headers,
+			Rows:      dataRows,
+			StartRow:  1,
+			EndRow:    len(rows),
+			ColCount:  len(headers),
+			Meta: map[string]interface{}{
 				"rowCount": len(dataRows),
 				"colCount": len(headers),
-				"rows":     dataRows,
-			}
-
-			content, err := json.Marshal(chunkMeta)
-			if err != nil {
-				return nil, err
-			}
-			doc.Content = string(content)
+			},
 		}
-		g.Log().Debugf(ctx, "xlsx parser doc Content: %+v", doc.Content)
+
+		// 将工作表数据转换为 JSON 字符串
+		content, err := json.Marshal(sheetData)
+		if err != nil {
+			g.Log().Warningf(ctx, "failed to marshal sheet data: %v", err)
+			continue
+		}
+
+		// 创建文档对象
+		doc := &schema.Document{
+			Content: string(content),
+			MetaData: map[string]interface{}{
+				"sheetName": sheetName,
+				"headers":   headers,
+				"rowCount":  len(dataRows),
+				"colCount":  len(headers),
+			},
+		}
+
+		documents = append(documents, doc)
+		g.Log().Debugf(ctx, "xlsx parser processed sheet %s with %d rows", sheetName, len(rows))
 	}
 
-	return docs, nil
+	if len(documents) == 0 {
+		// 如果没有成功解析任何工作表，尝试使用原始解析方法
+		return p.Parser.Parse(ctx, bytes.NewReader(data), opts...)
+	}
+
+	return documents, nil
 }
 
 // CSVParser CSV文件解析器（结构化处理）
@@ -199,53 +236,118 @@ func NewCSVParser(ctx context.Context) (*CSVParser, error) {
 	return &CSVParser{Parser: p}, nil
 }
 
-// Parse 重写 Parse 方法，增加 CSV 特定处理
+// Parse 重写 Parse 方法，使用 encoding/csv 包增强 CSV 特定处理
 func (p *CSVParser) Parse(ctx context.Context, reader io.Reader, opts ...parser.Option) ([]*schema.Document, error) {
-	docs, err := p.Parser.Parse(ctx, reader, opts...)
+	// 读取整个文件内容到内存
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
-	for _, doc := range docs {
-		rows := parseCSVContent(doc.Content)
 
-		if len(rows) > 0 {
-			headers := rows[0]
-			dataRows := rows[1:]
+	// 创建 CSV 读取器
+	csvReader := csv.NewReader(bytes.NewReader(data))
 
-			chunkMeta := map[string]interface{}{
-				"headers":  headers,
-				"rowCount": len(dataRows),
-				"colCount": len(headers),
-				"rows":     dataRows,
-			}
+	// 配置 CSV 读取器
+	csvReader.LazyQuotes = true       // 允许字段中的引号
+	csvReader.TrimLeadingSpace = true // 修剪前导空格
+	csvReader.ReuseRecord = true      // 重用记录以减少内存分配
 
-			content, err := json.Marshal(chunkMeta)
-			if err != nil {
-				return nil, err
-			}
-			doc.Content = string(content)
-		}
-		g.Log().Infof(ctx, "csv parser doc Content: %+v", doc.Content)
+	// 尝试自动检测分隔符
+	if separator := detectSeparator(string(data)); separator != 0 {
+		csvReader.Comma = separator
 	}
 
-	return docs, nil
+	// 读取所有记录
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		g.Log().Warningf(ctx, "CSV parsing error with standard reader: %v, falling back to original parser", err)
+		return p.Parser.Parse(ctx, bytes.NewReader(data), opts...)
+	}
+
+	if len(records) == 0 {
+		g.Log().Warningf(ctx, "CSV file is empty, falling back to original parser")
+		return p.Parser.Parse(ctx, bytes.NewReader(data), opts...)
+	}
+
+	// 提取表头和数据行
+	headers := records[0]
+	dataRows := records[1:]
+
+	// 创建元数据
+	csvData := XlsxSheetChunk{
+		SheetName: "Sheet1", // CSV 没有工作表概念，默认为 Sheet1
+		Headers:   headers,
+		Rows:      dataRows,
+		StartRow:  1,
+		EndRow:    len(records),
+		ColCount:  len(headers),
+		Meta: map[string]interface{}{
+			"rowCount":  len(dataRows),
+			"colCount":  len(headers),
+			"separator": string(csvReader.Comma),
+		},
+	}
+
+	// 将数据转换为 JSON 字符串
+	content, err := json.Marshal(csvData)
+	if err != nil {
+		g.Log().Warningf(ctx, "Failed to marshal CSV data: %v", err)
+		return p.Parser.Parse(ctx, bytes.NewReader(data), opts...)
+	}
+
+	// 创建文档对象
+	doc := &schema.Document{
+		Content: string(content),
+		MetaData: map[string]interface{}{
+			"headers":   headers,
+			"rowCount":  len(dataRows),
+			"colCount":  len(headers),
+			"separator": string(csvReader.Comma),
+		},
+	}
+
+	g.Log().Infof(ctx, "CSV parser processed %d rows with separator '%c'", len(records), csvReader.Comma)
+
+	return []*schema.Document{doc}, nil
 }
 
-// parseCSVContent 解析 CSV 内容为行列结构
-func parseCSVContent(content string) [][]string {
+// detectSeparator 尝试检测 CSV 文件的分隔符
+func detectSeparator(content string) rune {
+	// 常见的分隔符
+	separators := []rune{',', ';', '\t', '|'}
+
+	// 获取第一行
+	firstLine := ""
 	lines := strings.Split(content, "\n")
-	var rows [][]string
-	for _, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-		var row []string
-		for _, cell := range strings.Split(line, ",") {
-			row = append(row, strings.Trim(cell, `"`))
-		}
-		rows = append(rows, row)
+	if len(lines) > 0 {
+		firstLine = lines[0]
+	} else {
+		return 0
 	}
-	return rows
+
+	// 计算每个分隔符在第一行中出现的次数
+	counts := make(map[rune]int)
+	for _, sep := range separators {
+		counts[sep] = strings.Count(firstLine, string(sep))
+	}
+
+	// 找到出现次数最多的分隔符
+	maxCount := 0
+	var bestSeparator rune
+	for sep, count := range counts {
+		if count > maxCount {
+			maxCount = count
+			bestSeparator = sep
+		}
+	}
+
+	// 如果找到合适的分隔符，返回它
+	if maxCount > 0 {
+		return bestSeparator
+	}
+
+	// 默认使用逗号
+	return ','
 }
 
 func newParser(ctx context.Context) (p parser.Parser, err error) {
