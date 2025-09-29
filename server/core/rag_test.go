@@ -8,6 +8,7 @@ import (
 
 	"github.com/cloudwego/eino/schema"
 	"github.com/elastic/go-elasticsearch/v8"
+	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/wangle201210/go-rag/server/core/config"
@@ -43,7 +44,8 @@ func TestIndex(t *testing.T) {
 	_init()
 	ctx := context.Background()
 	uriList := []string{
-		"./test_file/readme.md",
+		"./test_file/test.xlsx",
+		// "./test_file/readme.md",
 		// "./test_file/readme2.md",
 		// "./test_file/readme.html",
 		// "./test_file/test.pdf",

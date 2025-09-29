@@ -5,6 +5,8 @@ import (
 
 	"github.com/cloudwego/eino-ext/components/document/parser/html"
 	"github.com/cloudwego/eino-ext/components/document/parser/pdf"
+	"github.com/cloudwego/eino-ext/components/document/parser/xlsx"
+
 	"github.com/cloudwego/eino/components/document/parser"
 	"github.com/wangle201210/go-rag/server/core/common"
 )
@@ -18,6 +20,7 @@ func newParser(ctx context.Context) (p parser.Parser, err error) {
 	if err != nil {
 		return nil, err
 	}
+	xlsxParser, err := xlsx.NewXlsxParser(ctx, nil)
 
 	pdfParser, err := pdf.NewPDFParser(ctx, &pdf.Config{})
 	if err != nil {
@@ -30,6 +33,7 @@ func newParser(ctx context.Context) (p parser.Parser, err error) {
 		Parsers: map[string]parser.Parser{
 			".html": htmlParser,
 			".pdf":  pdfParser,
+			".xlsx": xlsxParser,
 		},
 		// 设置默认解析器，用于处理未知格式
 		FallbackParser: textParser,

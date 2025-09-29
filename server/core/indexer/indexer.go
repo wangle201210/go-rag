@@ -66,23 +66,6 @@ func newIndexer(ctx context.Context, conf *config.Config) (idr indexer.Indexer, 
 	return idr, nil
 }
 
-func getMdContentWithTitle(doc *schema.Document) string {
-	if doc.MetaData == nil {
-		return doc.Content
-	}
-	title := ""
-	list := []string{"h1", "h2", "h3", "h4", "h5", "h6"}
-	for _, v := range list {
-		if d, e := doc.MetaData[v].(string); e && len(d) > 0 {
-			title += fmt.Sprintf("%s:%s ", v, d)
-		}
-	}
-	if len(title) == 0 {
-		return doc.Content
-	}
-	return title + "\n" + doc.Content
-}
-
 func getExtData(doc *schema.Document) map[string]any {
 	if doc.MetaData == nil {
 		return nil
