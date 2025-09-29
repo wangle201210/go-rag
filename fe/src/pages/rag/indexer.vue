@@ -9,26 +9,13 @@ const indexResult = ref(null)
 const knowledgeSelectorRef = ref(null)
 
 function beforeUpload(file) {
-  // 检查文件类型 - 支持更多格式
-  const allowedTypes = [
-    'application/pdf', 
-    'text/markdown', 
-    'text/html', 
-    'text/plain',
-    'text/csv',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  ]
-  
   // 检查文件扩展名
-  const allowedExtensions = ['.pdf', '.md', '.markdown', '.html', '.htm', '.txt', '.csv', '.json', '.xlsx']
+  const allowedExtensions = ['.pdf', '.md', '.markdown', '.html', '.htm', '.txt', '.csv', '.xlsx']
   const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
-  
-  const isAllowedType = allowedTypes.includes(file.type)
   const isAllowedExtension = allowedExtensions.includes(fileExtension)
   
-  if (!isAllowedType && !isAllowedExtension) {
-    ElMessage.error('支持的文件格式：PDF、Markdown、HTML、TXT、CSV、JSON文件!')
+  if (!isAllowedExtension) {
+    ElMessage.error('支持的文件格式：PDF、Markdown、HTML、TXT、CSV、XLSX文件!')
     return false
   }
 
