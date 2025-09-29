@@ -13,6 +13,8 @@ const (
 	Title1 = "h1"
 	Title2 = "h2"
 	Title3 = "h3"
+
+	XlsxRow = "_row"
 )
 
 var (
