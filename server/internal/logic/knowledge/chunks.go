@@ -15,7 +15,11 @@ func SaveChunksData(ctx context.Context, documentsId int64, chunks []entity.Know
 		return nil
 	}
 	status := int(v1.StatusIndexing)
-	_, err := dao.KnowledgeChunks.Ctx(ctx).Data(chunks).Save()
+	// 使用 OnConflict 指定冲突列（chunk_id 是唯一索引）
+	// 当 chunk_id 冲突时，更新其他字段
+	_, err := dao.KnowledgeChunks.Ctx(ctx).Data(chunks).
+		OnConflict("chunk_id").
+		Save()
 	if err != nil {
 		g.Log().Errorf(ctx, "SaveChunksData err=%+v", err)
 		status = int(v1.StatusFailed)

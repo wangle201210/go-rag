@@ -7,7 +7,7 @@ import (
 	"github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive"
 	"github.com/cloudwego/eino/components/document"
 	"github.com/cloudwego/eino/schema"
-	"github.com/wangle201210/go-rag/server/core/common"
+	coretypes "github.com/wangle201210/go-rag/server/core/types"
 )
 
 // newDocumentTransformer component initialization function of node 'DocumentTransformer3' in graph 'rag'
@@ -25,7 +25,7 @@ func newDocumentTransformer(ctx context.Context) (tfr document.Transformer, err 
 	}
 	// md 文档特殊处理
 	mdTrans, err := markdown.NewHeaderSplitter(ctx, &markdown.HeaderConfig{
-		Headers:     map[string]string{"#": common.Title1, "##": common.Title2, "###": common.Title3},
+		Headers:     map[string]string{"#": coretypes.Title1, "##": coretypes.Title2, "###": coretypes.Title3},
 		TrimHeaders: false,
 	})
 	if err != nil {

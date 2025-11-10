@@ -8,11 +8,12 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag/server/core/common"
+	coretypes "github.com/wangle201210/go-rag/server/core/types"
 )
 
 func qa(ctx context.Context, docs []*schema.Document) (output []*schema.Document, err error) {
 	var knowledgeName string
-	if value, ok := ctx.Value(common.KnowledgeName).(string); ok {
+	if value, ok := ctx.Value(coretypes.KnowledgeName).(string); ok {
 		knowledgeName = value
 	} else {
 		err = fmt.Errorf("必须提供知识库名称")
@@ -29,7 +30,7 @@ func qa(ctx context.Context, docs []*schema.Document) (output []*schema.Document
 				return
 			}
 			// 生成QA和内容放在一个chunk的不同字段
-			doc.MetaData[common.FieldQAContent] = qaContent
+			doc.MetaData[coretypes.FieldQAContent] = qaContent
 		}(doc)
 	}
 	wg.Wait()
@@ -38,7 +39,7 @@ func qa(ctx context.Context, docs []*schema.Document) (output []*schema.Document
 
 func getQAContent(ctx context.Context, doc *schema.Document, knowledgeName string) (qaContent string, err error) {
 	// 已经有数据了就不要再生成了
-	if s, ok := doc.MetaData[common.FieldQAContent].(string); ok && len(s) > 0 {
+	if s, ok := doc.MetaData[coretypes.FieldQAContent].(string); ok && len(s) > 0 {
 		return s, nil
 	}
 	cm, err := common.GetQAModel(ctx, nil)

@@ -11,7 +11,7 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/wangle201210/chat-history/eino"
+	"github.com/wangle201210/go-rag/server/chat-history/eino"
 	"github.com/wangle201210/go-rag/server/internal/dao"
 )
 
@@ -38,6 +38,9 @@ func init() {
 		g.Log().Fatalf(ctx, "newChat failed, err=%v", err)
 		return
 	}
+	// 使用 DSN 初始化，chat-history 包会根据 DSN 判断数据库类型
+	// 对于 SQLite: file.db?_journal_mode=WAL
+	// 对于 MySQL: user:pass@tcp(host:port)/dbname?charset=utf8mb4
 	c.eh = eino.NewEinoHistory(dao.GetDsn())
 	chat = c
 }
@@ -76,7 +79,7 @@ func (x *Chat) GetAnswerStream(ctx context.Context, convID string, docs []*schem
 	ctx = context.Background()
 	streamData, err := stream(ctx, x.cm, messages)
 	if err != nil {
-		err = fmt.Errorf("生成答案失败: %w", err)
+		return nil, fmt.Errorf("生成答案失败: %w", err)
 	}
 	srs := streamData.Copy(2)
 	go func() {

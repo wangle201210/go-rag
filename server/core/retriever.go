@@ -13,6 +13,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/wangle201210/go-rag/server/core/common"
 	"github.com/wangle201210/go-rag/server/core/rerank"
+	coretypes "github.com/wangle201210/go-rag/server/core/types"
 )
 
 type RetrieveReq struct {
@@ -149,7 +150,7 @@ func (x *Rag) retrieve(ctx context.Context, req *RetrieveReq, qa bool) (msg []*s
 	esQuery := []types.Query{
 		{
 			Bool: &types.BoolQuery{
-				Must: []types.Query{{Match: map[string]types.MatchQuery{common.KnowledgeName: {Query: req.KnowledgeName}}}},
+				Must: []types.Query{{Match: map[string]types.MatchQuery{coretypes.KnowledgeName: {Query: req.KnowledgeName}}}},
 			},
 		},
 	}

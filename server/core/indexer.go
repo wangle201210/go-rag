@@ -2,18 +2,18 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/cloudwego/eino/components/document"
 	"github.com/cloudwego/eino/schema"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	v1 "github.com/wangle201210/go-rag/server/api/rag/v1"
-	"github.com/wangle201210/go-rag/server/core/common"
-	"github.com/wangle201210/go-rag/server/core/retriever"
+	coretypes "github.com/wangle201210/go-rag/server/core/types"
+	"github.com/wangle201210/go-rag/server/core/vector"
 	"github.com/wangle201210/go-rag/server/internal/logic/knowledge"
 	"github.com/wangle201210/go-rag/server/internal/model/entity"
 )
@@ -44,7 +44,7 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 	s := document.Source{
 		URI: req.URI,
 	}
-	ctx = context.WithValue(ctx, common.KnowledgeName, req.KnowledgeName)
+	ctx = context.WithValue(ctx, coretypes.KnowledgeName, req.KnowledgeName)
 	ids, err = x.idxer.Invoke(ctx, s)
 	if err != nil {
 		return
@@ -76,7 +76,7 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 // IndexAsync
 // 通过 schema.Document 异步 生成QA&embedding
 func (x *Rag) IndexAsync(ctx context.Context, req *IndexAsyncReq) (ids []string, err error) {
-	ctx = context.WithValue(ctx, common.KnowledgeName, req.KnowledgeName)
+	ctx = context.WithValue(ctx, coretypes.KnowledgeName, req.KnowledgeName)
 	ids, err = x.idxerAsync.Invoke(ctx, req.Docs)
 	if err != nil {
 		return
@@ -88,40 +88,59 @@ func (x *Rag) IndexAsync(ctx context.Context, req *IndexAsyncReq) (ids []string,
 // 通过docIDs 异步 生成QA&embedding
 // 这个方法不用暴露出去
 func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq) (ids []string, err error) {
-	esQuery := &types.Query{
-		Bool: &types.BoolQuery{
-			Must: []types.Query{
-				{Match: map[string]types.MatchQuery{common.KnowledgeName: {Query: req.KnowledgeName}}},
-				{Terms: &types.TermsQuery{TermsQuery: map[string]types.TermsQueryField{"_id": req.DocsIDs}}},
+	var searchResp *vector.SearchResponse
+
+	// 根据向量存储类型构建不同的查询
+	switch x.conf.VectorStore.(type) {
+	case *vector.ESVectorStore:
+		esQuery := &types.Query{
+			Bool: &types.BoolQuery{
+				Must: []types.Query{
+					{Match: map[string]types.MatchQuery{coretypes.KnowledgeName: {Query: req.KnowledgeName}}},
+					{Terms: &types.TermsQuery{TermsQuery: map[string]types.TermsQueryField{"_id": req.DocsIDs}}},
+				},
 			},
-		},
+		}
+
+		// 使用向量存储接口搜索文档
+		searchResp, err = x.conf.VectorStore.SearchDocuments(ctx, &vector.SearchRequest{
+			IndexName:     x.conf.IndexName,
+			Query:         esQuery,
+			Size:          1000,
+			KnowledgeName: req.KnowledgeName,
+			DocIDs:        req.DocsIDs,
+		})
+		if err != nil {
+			return
+		}
+
+	case *vector.QdrantVectorStore:
+		// Qdrant 使用简单的过滤查询
+		searchResp, err = x.conf.VectorStore.SearchDocuments(ctx, &vector.SearchRequest{
+			IndexName:     x.conf.IndexName,
+			Query:         nil, // Qdrant 不需要复杂查询，通过 KnowledgeName 和 DocIDs 过滤
+			Size:          1000,
+			KnowledgeName: req.KnowledgeName,
+			DocIDs:        req.DocsIDs,
+		})
+		if err != nil {
+			return
+		}
+
+	default:
+		return nil, fmt.Errorf("unsupported vector store type")
 	}
 
-	sreq := search.NewRequest()
-	sreq.Query = esQuery
-	sreq.Size = common.Of(1000)
-	resp, err := search.NewSearchFunc(x.client)().
-		Index(x.conf.IndexName).
-		Request(sreq).
-		Do(ctx)
-	if err != nil {
-		return
-	}
 	var docs []*schema.Document
 	var chunks []entity.KnowledgeChunks
-	if len(resp.Hits.Hits) < len(req.DocsIDs) && req.try > 0 {
-		g.Log().Warningf(ctx, "indexAsyncByDocsID Hits < DocsIDs, Hits=%d, DocsIDs=%d", len(resp.Hits.Hits), len(req.DocsIDs))
+	if len(searchResp.Documents) < len(req.DocsIDs) && req.try > 0 {
+		g.Log().Warningf(ctx, "indexAsyncByDocsID Hits < DocsIDs, Hits=%d, DocsIDs=%d", len(searchResp.Documents), len(req.DocsIDs))
 		req.try--
 		time.Sleep(time.Second)
 		return x.indexAsyncByDocsID(ctx, req)
 	}
-	for _, hit := range resp.Hits.Hits {
-		doc := &schema.Document{}
-		doc, err = retriever.EsHit2Document(ctx, hit)
-		if err != nil {
-			g.Log().Errorf(ctx, "EsHit2Document failed, err=%v", err)
-			return
-		}
+
+	for _, doc := range searchResp.Documents {
 		docParseExt(doc)
 		docs = append(docs, doc)
 
@@ -157,9 +176,9 @@ func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq
 
 // 检索会把原来的 MetaData 放到 MetaData.ext 中，这里需要把原来的 MetaData 恢复
 func docParseExt(doc *schema.Document) {
-	if ext, ok := doc.MetaData[common.FieldExtra].(string); ok && len(ext) > 0 {
+	if ext, ok := doc.MetaData[coretypes.FieldExtra].(string); ok && len(ext) > 0 {
 		extData := map[string]any{}
-		if err := sonic.Unmarshal([]byte(doc.MetaData[common.FieldExtra].(string)), &extData); err != nil {
+		if err := sonic.Unmarshal([]byte(doc.MetaData[coretypes.FieldExtra].(string)), &extData); err != nil {
 			// 忽略err
 			g.Log().Errorf(gctx.New(), "documentParseExt unmarshal failed, err=%v", err)
 			return
@@ -169,5 +188,5 @@ func docParseExt(doc *schema.Document) {
 }
 
 func (x *Rag) DeleteDocument(ctx context.Context, documentID string) error {
-	return common.DeleteDocument(ctx, x.conf.Client, documentID)
+	return x.conf.VectorStore.DeleteDocument(ctx, x.conf.IndexName, documentID)
 }

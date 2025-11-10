@@ -14,14 +14,27 @@ database:
     user: "root" # 账号
     pass: "123456" # 密码
     name: "go-rag" # 数据库名称
-    type: "mysql" # 数据库类型
+    type: "mysql" # 数据库类型, mysql / sqlite
     charset: "utf8mb4" # 数据库编码，一定要加上，因为文档里面经常出现特殊字符
+    file: "xxx.sqlite" # sqlite 文件路径，若启用 sqlite 必填
+    # SQLite 可选参数（推荐配置以提高性能）
+    # busy_timeout: 5000 # 忙等待超时时间（毫秒）
+    # journal_mode: WAL # 日志模式（推荐 WAL）
+    # synchronous: NORMAL # 同步模式（NORMAL/FULL）
+    # cache_size: -2000 # 缓存大小（负数表示 KB）
+    # max_open_conns: 1 # 最大连接数（SQLite 建议 1）
+    # max_idle_conns: 1 # 最大空闲连接数（SQLite 建议 1）
 
-es:
-  address: "http://elasticsearch:9200"
+vector:
+  type: "es" # 向量存储类型：es 或 qdrant
   indexName: "rag-test"
-#  username: "elastic"
-#  password: "123456"
+  es:
+    address: "http://elasticsearch:9200"
+#    username: "elastic"
+#    password: "123456"
+  qdrant:
+    address: "http://qdrant:6333"
+#    apiKey: ""
 
 embedding:
   apiKey: "sk-****"

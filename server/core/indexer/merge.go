@@ -9,7 +9,7 @@ import (
 	"github.com/cloudwego/eino-ext/components/document/loader/file"
 	"github.com/cloudwego/eino/schema"
 	"github.com/google/uuid"
-	"github.com/wangle201210/go-rag/server/core/common"
+	coretypes "github.com/wangle201210/go-rag/server/core/types"
 )
 
 // docAddIDAndMerge component initialization function of node 'Lambda1' in graph 't'
@@ -46,21 +46,21 @@ func mergeMD(ctx context.Context, docs []*schema.Document) (output []*schema.Doc
 			nd = nil
 		}
 		// 不是同一个一级标题的就不要放一起了
-		if nd != nil && doc.MetaData[common.Title1] != nd.MetaData[common.Title1] {
+		if nd != nil && doc.MetaData[coretypes.Title1] != nd.MetaData[coretypes.Title1] {
 			ndocs = append(ndocs, nd)
 			nd = nil
 		}
 		// 不是同一个二级标题的就不要放一起了
 		// 如果nd的h2是nil，证明之前只有h1,且两个的h1相等，则直接合并
-		if nd != nil && nd.MetaData[common.Title2] != nil && doc.MetaData[common.Title2] != nd.MetaData[common.Title2] {
+		if nd != nil && nd.MetaData[coretypes.Title2] != nil && doc.MetaData[coretypes.Title2] != nd.MetaData[coretypes.Title2] {
 			ndocs = append(ndocs, nd)
 			nd = nil
 		}
 		if nd == nil {
 			nd = doc
 		} else {
-			mergeTitle(nd, doc, common.Title2)
-			mergeTitle(nd, doc, common.Title3)
+			mergeTitle(nd, doc, coretypes.Title2)
+			mergeTitle(nd, doc, coretypes.Title3)
 			nd.Content += doc.Content
 		}
 	}
@@ -75,7 +75,7 @@ func mergeMD(ctx context.Context, docs []*schema.Document) (output []*schema.Doc
 
 func mergeXLSX(ctx context.Context, docs []*schema.Document) (output []*schema.Document, err error) {
 	for _, doc := range docs {
-		marshal, _ := sonic.Marshal(doc.MetaData[common.XlsxRow])
+		marshal, _ := sonic.Marshal(doc.MetaData[coretypes.XlsxRow])
 		doc.Content = string(marshal)
 	}
 	return docs, nil
