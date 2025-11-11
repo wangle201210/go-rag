@@ -4,6 +4,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/qdrant/go-client/qdrant"
 	"github.com/wangle201210/go-rag/server/core"
 	"github.com/wangle201210/go-rag/server/core/config"
 	"github.com/wangle201210/go-rag/server/core/vector"
@@ -34,6 +35,7 @@ func init() {
 	} else if vectorType == "qdrant" {
 		vectorCfg.Qdrant = &vector.QdrantConfig{
 			Address: g.Cfg().MustGet(ctx, "vector.qdrant.address").String(),
+			Port:    g.Cfg().MustGet(ctx, "vector.qdrant.port").Int(),
 			APIKey:  g.Cfg().MustGet(ctx, "vector.qdrant.apiKey").String(),
 		}
 	}
@@ -45,15 +47,19 @@ func init() {
 		return
 	}
 
-	// 兼容旧代码：如果是 ES，获取 client
+	// 根据类型获取对应的客户端
 	var client *elasticsearch.Client
+	var qdrantClient *qdrant.Client
+
 	if esStore, ok := vectorStore.(*vector.ESVectorStore); ok {
 		client = esStore.GetClient()
+	} else if qdrantStore, ok := vectorStore.(*vector.QdrantVectorStore); ok {
+		qdrantClient = qdrantStore.GetClient()
 	}
 
 	ragSvr, err = core.New(ctx, &config.Config{
 		Client:         client,
-		VectorStore:    vectorStore,
+		QdrantClient:   qdrantClient,
 		IndexName:      indexName,
 		APIKey:         g.Cfg().MustGet(ctx, "embedding.apiKey").String(),
 		BaseURL:        g.Cfg().MustGet(ctx, "embedding.baseURL").String(),

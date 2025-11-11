@@ -24,6 +24,8 @@ go.work.sum
 # env file
 .env
 .idea
+.vscode
+.cursor
 
 server/manifest/config/config.yaml
 /server/uploads/
@@ -39,3 +41,12 @@ server/manifest/config/config.yaml
 **/node_modules/
 **/dist/
 **/build/
+.DS_Store
+*.md
+*.pdf
+*.yaml
+*.yml
+*.db
+*.sqlite3
+*.lock
+*.json

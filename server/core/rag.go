@@ -40,12 +40,12 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 		return nil, fmt.Errorf("indexName is empty")
 	}
 	// 确保 index 存在
-	exists, err := conf.VectorStore.IndexExists(ctx, conf.IndexName)
+	exists, err := conf.IndexExists(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		err = conf.VectorStore.CreateIndex(ctx, conf.IndexName)
+		err = conf.CreateIndex(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -86,5 +86,5 @@ func New(ctx context.Context, conf *config.Config) (*Rag, error) {
 
 // GetKnowledgeBaseList 获取知识库列表
 func (x *Rag) GetKnowledgeBaseList(ctx context.Context) (list []string, err error) {
-	return x.conf.VectorStore.GetKnowledgeBaseList(ctx, x.conf.IndexName)
+	return x.conf.GetKnowledgeBaseList(ctx)
 }

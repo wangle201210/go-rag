@@ -8,12 +8,10 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/cloudwego/eino/components/document"
 	"github.com/cloudwego/eino/schema"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	v1 "github.com/wangle201210/go-rag/server/api/rag/v1"
 	coretypes "github.com/wangle201210/go-rag/server/core/types"
-	"github.com/wangle201210/go-rag/server/core/vector"
 	"github.com/wangle201210/go-rag/server/internal/logic/knowledge"
 	"github.com/wangle201210/go-rag/server/internal/model/entity"
 )
@@ -47,8 +45,10 @@ func (x *Rag) Index(ctx context.Context, req *IndexReq) (ids []string, err error
 	ctx = context.WithValue(ctx, coretypes.KnowledgeName, req.KnowledgeName)
 	ids, err = x.idxer.Invoke(ctx, s)
 	if err != nil {
+		g.Log().Errorf(ctx, "Index idxer.Invoke failed, err=%v", err)
 		return
 	}
+	g.Log().Infof(ctx, "Index success, generated %d chunks with IDs: %v", len(ids), ids)
 	go func() {
 		// 测试下来这里必须 sleep 一段时间，否则下面的 indexAsyncByDocsID 在es里面搜索不到该条数据，应该是es本身会有一定延迟
 		// 这里会有一定隐患，刚提交index后项目就崩了，可能会有几条chunk没有生成QA
@@ -88,59 +88,29 @@ func (x *Rag) IndexAsync(ctx context.Context, req *IndexAsyncReq) (ids []string,
 // 通过docIDs 异步 生成QA&embedding
 // 这个方法不用暴露出去
 func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq) (ids []string, err error) {
-	var searchResp *vector.SearchResponse
-
-	// 根据向量存储类型构建不同的查询
-	switch x.conf.VectorStore.(type) {
-	case *vector.ESVectorStore:
-		esQuery := &types.Query{
-			Bool: &types.BoolQuery{
-				Must: []types.Query{
-					{Match: map[string]types.MatchQuery{coretypes.KnowledgeName: {Query: req.KnowledgeName}}},
-					{Terms: &types.TermsQuery{TermsQuery: map[string]types.TermsQueryField{"_id": req.DocsIDs}}},
-				},
-			},
-		}
-
-		// 使用向量存储接口搜索文档
-		searchResp, err = x.conf.VectorStore.SearchDocuments(ctx, &vector.SearchRequest{
-			IndexName:     x.conf.IndexName,
-			Query:         esQuery,
-			Size:          1000,
-			KnowledgeName: req.KnowledgeName,
-			DocIDs:        req.DocsIDs,
-		})
-		if err != nil {
-			return
-		}
-
-	case *vector.QdrantVectorStore:
-		// Qdrant 使用简单的过滤查询
-		searchResp, err = x.conf.VectorStore.SearchDocuments(ctx, &vector.SearchRequest{
-			IndexName:     x.conf.IndexName,
-			Query:         nil, // Qdrant 不需要复杂查询，通过 KnowledgeName 和 DocIDs 过滤
-			Size:          1000,
-			KnowledgeName: req.KnowledgeName,
-			DocIDs:        req.DocsIDs,
-		})
-		if err != nil {
-			return
-		}
-
-	default:
-		return nil, fmt.Errorf("unsupported vector store type")
+	// 搜索文档
+	g.Log().Infof(ctx, "indexAsyncByDocsID searching for %d docs in knowledge base: %s, IDs: %v", len(req.DocsIDs), req.KnowledgeName, req.DocsIDs)
+	searchResp, err := x.conf.SearchDocumentsByIDs(ctx, req.KnowledgeName, req.DocsIDs, 1000)
+	if err != nil {
+		g.Log().Errorf(ctx, "indexAsyncByDocsID SearchDocumentsByIDs failed, err=%v", err)
+		return nil, err
 	}
 
-	var docs []*schema.Document
 	var chunks []entity.KnowledgeChunks
-	if len(searchResp.Documents) < len(req.DocsIDs) && req.try > 0 {
-		g.Log().Warningf(ctx, "indexAsyncByDocsID Hits < DocsIDs, Hits=%d, DocsIDs=%d", len(searchResp.Documents), len(req.DocsIDs))
+	if len(searchResp) < len(req.DocsIDs) && req.try > 0 {
+		g.Log().Warningf(ctx, "indexAsyncByDocsID Hits < DocsIDs, Hits=%d, DocsIDs=%d, remaining tries=%d", len(searchResp), len(req.DocsIDs), req.try)
 		req.try--
 		time.Sleep(time.Second)
 		return x.indexAsyncByDocsID(ctx, req)
 	}
 
-	for _, doc := range searchResp.Documents {
+	if len(searchResp) == 0 {
+		g.Log().Errorf(ctx, "indexAsyncByDocsID no documents found in Qdrant after all retries, DocsIDs=%v", req.DocsIDs)
+		return nil, fmt.Errorf("no documents found in Qdrant for IDs: %v", req.DocsIDs)
+	}
+
+	var docs []*schema.Document
+	for _, doc := range searchResp {
 		docParseExt(doc)
 		docs = append(docs, doc)
 
@@ -149,7 +119,9 @@ func (x *Rag) indexAsyncByDocsID(ctx context.Context, req *IndexAsyncByDocsIDReq
 			g.Log().Errorf(ctx, "sonic.Marshal failed, err=%v", err)
 			continue
 		}
+		// Id 设置为 0，让数据库自动分配（兼容 MySQL 和 SQLite）
 		chunks = append(chunks, entity.KnowledgeChunks{
+			Id:             0,
 			KnowledgeDocId: req.DocumentsId,
 			ChunkId:        doc.ID,
 			Content:        doc.Content,
@@ -188,5 +160,5 @@ func docParseExt(doc *schema.Document) {
 }
 
 func (x *Rag) DeleteDocument(ctx context.Context, documentID string) error {
-	return x.conf.VectorStore.DeleteDocument(ctx, x.conf.IndexName, documentID)
+	return x.conf.DeleteDocument(ctx, documentID)
 }

@@ -64,18 +64,22 @@ func newAsyncIndexer(ctx context.Context, conf *config.Config) (idr indexer.Inde
 			return nil, err
 		}
 		return idr, nil
-	} else {
+	} else if conf.QdrantClient != nil {
 		// Qdrant indexer
 		idr, err = NewQdrantIndexer(ctx, &QdrantIndexerConfig{
-			VectorStore: conf.VectorStore,
-			IndexName:   conf.IndexName,
-			Embedding:   embeddingIns11,
-			BatchSize:   10,
-			IsAsync:     true,
+			Client:     conf.QdrantClient,
+			Collection: conf.IndexName,
+			VectorDim:  1024, // 根据你的 embedding 模型调整
+			Distance:   0,    // 使用默认 Cosine
+			Embedding:  embeddingIns11,
+			BatchSize:  10,
+			IsAsync:    true,
 		})
 		if err != nil {
 			return nil, err
 		}
 		return idr, nil
+	} else {
+		return nil, fmt.Errorf("no valid client configuration found")
 	}
 }

@@ -18,7 +18,7 @@ var db *gorm.DB
 func init() {
 	err := InitDB()
 	if err != nil {
-		g.Log().Fatal(context.Background(), "database connection not initialized")
+		g.Log().Fatal(context.Background(), "database connection not initialized, err %v", err)
 	}
 }
 
@@ -39,7 +39,7 @@ func InitDB() error {
 
 	switch dbType {
 	case "sqlite":
-		filePath := g.Cfg().MustGet(ctx, "database.default.file").String()
+		filePath := g.Cfg().MustGet(ctx, "database.default.host").String()
 		if filePath == "" {
 			return fmt.Errorf("sqlite file path is required when using sqlite")
 		}

@@ -13,7 +13,6 @@ import (
 	"github.com/wangle201210/go-rag/server/core/common"
 	"github.com/wangle201210/go-rag/server/core/config"
 	coretypes "github.com/wangle201210/go-rag/server/core/types"
-	"github.com/wangle201210/go-rag/server/core/vector"
 )
 
 // newRetriever component initialization function of node 'Retriever1' in graph 'retriever'
@@ -23,50 +22,44 @@ func newRetriever(ctx context.Context, conf *config.Config) (rtr retriever.Retri
 		vectorField = value
 	}
 
-	// 根据向量存储类型创建不同的 retriever
-	switch store := conf.VectorStore.(type) {
-	case *vector.ESVectorStore:
+	embeddingIns, err := common.NewEmbedding(ctx, conf)
+	if err != nil {
+		return nil, err
+	}
+
+	// 根据客户端类型创建不同的 retriever
+	if conf.Client != nil {
 		// ES retriever
 		retrieverConfig := &es8.RetrieverConfig{
-			Client: store.GetClient(),
+			Client: conf.Client,
 			Index:  conf.IndexName,
 			SearchMode: search_mode.SearchModeDenseVectorSimilarity(
 				search_mode.DenseVectorSimilarityTypeCosineSimilarity,
 				vectorField,
 			),
 			ResultParser: EsHit2Document,
+			Embedding:    embeddingIns,
 		}
-		embeddingIns11, err := common.NewEmbedding(ctx, conf)
-		if err != nil {
-			return nil, err
-		}
-		retrieverConfig.Embedding = embeddingIns11
 		rtr, err = es8.NewRetriever(ctx, retrieverConfig)
 		if err != nil {
 			return nil, err
 		}
 		return rtr, nil
-
-	case *vector.QdrantVectorStore:
+	} else if conf.QdrantClient != nil {
 		// Qdrant retriever
-		embeddingIns, err := common.NewEmbedding(ctx, conf)
-		if err != nil {
-			return nil, err
-		}
 		rtr, err = NewQdrantRetriever(ctx, &QdrantRetrieverConfig{
-			VectorStore: store,
-			IndexName:   conf.IndexName,
-			VectorField: vectorField,
+			Client:      conf.QdrantClient,
+			Collection:  conf.IndexName,
 			Embedding:   embeddingIns,
+			VectorField: vectorField,
 		})
 		if err != nil {
 			return nil, err
 		}
 		return rtr, nil
-
-	default:
-		return nil, fmt.Errorf("unsupported vector store type: %T", conf.VectorStore)
 	}
+
+	return nil, fmt.Errorf("no valid client configuration found")
 }
 
 func EsHit2Document(ctx context.Context, hit types.Hit) (doc *schema.Document, err error) {

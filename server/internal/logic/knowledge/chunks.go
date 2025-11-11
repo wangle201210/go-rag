@@ -15,17 +15,41 @@ func SaveChunksData(ctx context.Context, documentsId int64, chunks []entity.Know
 		return nil
 	}
 	status := int(v1.StatusIndexing)
-	// 使用 OnConflict 指定冲突列（chunk_id 是唯一索引）
-	// 当 chunk_id 冲突时，更新其他字段
-	_, err := dao.KnowledgeChunks.Ctx(ctx).Data(chunks).
-		OnConflict("chunk_id").
-		Save()
-	if err != nil {
-		g.Log().Errorf(ctx, "SaveChunksData err=%+v", err)
-		status = int(v1.StatusFailed)
+
+	// 逐个插入或更新，避免 SQLite 的 ON CONFLICT 语法问题
+	for _, chunk := range chunks {
+		// 先尝试查询是否存在
+		var existing entity.KnowledgeChunks
+		err := dao.KnowledgeChunks.Ctx(ctx).Where("chunk_id", chunk.ChunkId).Scan(&existing)
+
+		if err == nil && existing.Id > 0 {
+			// 已存在，更新（排除 id 和 created_at）
+			_, err = dao.KnowledgeChunks.Ctx(ctx).
+				Where("chunk_id", chunk.ChunkId).
+				Data(g.Map{
+					"knowledge_doc_id": chunk.KnowledgeDocId,
+					"content":          chunk.Content,
+					"ext":              chunk.Ext,
+					"status":           chunk.Status,
+				}).
+				Update()
+			if err != nil {
+				g.Log().Errorf(ctx, "SaveChunksData update failed for chunk_id=%s, err=%+v", chunk.ChunkId, err)
+				status = int(v1.StatusFailed)
+			}
+		} else {
+			// 不存在，插入（id 设为 0 让数据库自动分配）
+			chunk.Id = 0
+			_, err = dao.KnowledgeChunks.Ctx(ctx).Data(chunk).OmitEmpty().Insert()
+			if err != nil {
+				g.Log().Errorf(ctx, "SaveChunksData insert failed for chunk_id=%s, err=%+v", chunk.ChunkId, err)
+				status = int(v1.StatusFailed)
+			}
+		}
 	}
+
 	UpdateDocumentsStatus(ctx, documentsId, status)
-	return err
+	return nil
 }
 
 // GetChunksList 查询知识块列表

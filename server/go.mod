@@ -4,9 +4,9 @@ go 1.23.1
 
 require (
 	github.com/ThinkInAIXYZ/go-mcp v0.2.14
-	github.com/bytedance/sonic v1.13.2
+	github.com/bytedance/sonic v1.14.0
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cloudwego/eino v0.3.31
+	github.com/cloudwego/eino v0.4.1
 	github.com/cloudwego/eino-ext/components/document/loader/file v0.0.0-20250519091007-282cc7eb18d3
 	github.com/cloudwego/eino-ext/components/document/loader/url v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/cloudwego/eino-ext/components/document/parser/html v0.0.0-20250424061409-ccd60fbc7c1c
@@ -35,9 +35,11 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/bytedance/sonic/loader v0.2.4 // indirect
+	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
+	github.com/cloudwego/eino-ext/components/indexer/qdrant v0.0.0-20251107064029-2e128d3d2258 // indirect
+	github.com/cloudwego/eino-ext/components/retriever/qdrant v0.0.0-20251107064029-2e128d3d2258 // indirect
 	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250610035057-2c4e7c8488a5 // indirect
 	github.com/dslipak/pdf v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect

@@ -38,12 +38,18 @@ func (s *QdrantVectorStore) GetClient() *qdrant.Client {
 
 // CreateIndex 创建集合
 func (s *QdrantVectorStore) CreateIndex(ctx context.Context, indexName string) error {
-	// 创建集合，包含两个向量字段：content_vector 和 qa_content_vector
+	// 创建集合，使用命名向量配置以支持多向量
 	err := s.client.CreateCollection(ctx, &qdrant.CreateCollection{
 		CollectionName: indexName,
-		VectorsConfig: qdrant.NewVectorsConfig(&qdrant.VectorParams{
-			Size:     1024,
-			Distance: qdrant.Distance_Cosine,
+		VectorsConfig: qdrant.NewVectorsConfigMap(map[string]*qdrant.VectorParams{
+			coretypes.FieldContentVector: {
+				Size:     1024,
+				Distance: qdrant.Distance_Cosine,
+			},
+			coretypes.FieldQAContentVector: {
+				Size:     1024,
+				Distance: qdrant.Distance_Cosine,
+			},
 		}),
 	})
 	if err != nil {

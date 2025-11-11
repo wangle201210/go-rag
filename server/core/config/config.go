@@ -3,13 +3,13 @@ package config
 import (
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/wangle201210/go-rag/server/core/vector"
+	"github.com/qdrant/go-client/qdrant"
 )
 
 type Config struct {
-	Client      *elasticsearch.Client // 保留用于兼容
-	VectorStore vector.VectorStore    // 新的向量存储接口
-	IndexName   string                // index name
+	Client       *elasticsearch.Client // ES 客户端
+	QdrantClient *qdrant.Client        // Qdrant 客户端
+	IndexName    string                // index name / collection name
 	// embedding 时使用
 	APIKey         string
 	BaseURL        string
@@ -30,9 +30,9 @@ func (x *Config) GetChatModelConfig() *openai.ChatModelConfig {
 
 func (x *Config) Copy() *Config {
 	return &Config{
-		Client:      x.Client,
-		VectorStore: x.VectorStore,
-		IndexName:   x.IndexName,
+		Client:       x.Client,
+		QdrantClient: x.QdrantClient,
+		IndexName:    x.IndexName,
 		// embedding 时使用
 		APIKey:         x.APIKey,
 		BaseURL:        x.BaseURL,
