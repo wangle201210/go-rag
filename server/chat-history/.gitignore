@@ -23,30 +23,4 @@ go.work.sum
 
 # env file
 .env
-.idea
-.vscode
-.cursor
-
-server/manifest/config/config.yaml
-/server/uploads/
-**/package-lock.json
-/server/static/fe/
-**/.vite
-/server/go-rag-server
-/server/logs/
-/data/
-/server/manifest/config/config-docker.yaml
-/server/manifest/config/frpc.toml
-/fe/src/components.d.ts
-**/node_modules/
-**/dist/
-**/build/
-.DS_Store
-*.md
-*.pdf
-*.yaml
-*.yml
-*.db
-*.sqlite3
-*.lock
-*.json
+/.idea

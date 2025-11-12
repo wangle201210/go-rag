@@ -17,7 +17,12 @@ const (
 
 // SaveDocumentsInfo 保存文档信息
 func SaveDocumentsInfo(ctx context.Context, documents entity.KnowledgeDocuments) (id int64, err error) {
-	result, err := dao.KnowledgeDocuments.Ctx(ctx).Data(documents).Insert()
+	// 确保 ID 为 0，让数据库自动分配
+	documents.Id = 0
+
+	// OmitEmpty 会忽略零值字段（包括 ID=0），让数据库自动分配 ID
+	// 这样可以兼容 MySQL 和 SQLite 的自增主键
+	result, err := dao.KnowledgeDocuments.Ctx(ctx).Data(documents).OmitEmpty().Insert()
 	if err != nil {
 		g.Log().Errorf(ctx, "保存文档信息失败: %+v, 错误: %v", documents, err)
 		return 0, fmt.Errorf("保存文档信息失败: %w", err)
@@ -27,7 +32,6 @@ func SaveDocumentsInfo(ctx context.Context, documents entity.KnowledgeDocuments)
 	if err != nil {
 		return 0, fmt.Errorf("获取插入ID失败: %w", err)
 	}
-
 	g.Log().Infof(ctx, "文档保存成功, ID: %d", id)
 	return id, nil
 }

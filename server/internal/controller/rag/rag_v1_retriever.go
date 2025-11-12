@@ -9,7 +9,7 @@ import (
 	gorag "github.com/wangle201210/go-rag/server/core"
 	"github.com/wangle201210/go-rag/server/internal/logic/rag"
 
-	"github.com/wangle201210/go-rag/server/api/rag/v1"
+	v1 "github.com/wangle201210/go-rag/server/api/rag/v1"
 )
 
 func (c *ControllerV1) Retriever(ctx context.Context, req *v1.RetrieverReq) (res *v1.RetrieverRes, err error) {
@@ -37,11 +37,15 @@ func (c *ControllerV1) Retriever(ctx context.Context, req *v1.RetrieverReq) (res
 	for _, document := range msg {
 		if document.MetaData != nil {
 			delete(document.MetaData, "_dense_vector")
-			m := make(map[string]interface{})
-			if err = json.Unmarshal([]byte(document.MetaData["ext"].(string)), &m); err != nil {
-				return
+			if extValue, ok := document.MetaData["ext"]; ok && extValue != nil {
+				if extStr, ok := extValue.(string); ok && extStr != "" {
+					m := make(map[string]interface{})
+					if err = json.Unmarshal([]byte(extStr), &m); err != nil {
+						return
+					}
+					document.MetaData["ext"] = m
+				}
 			}
-			document.MetaData["ext"] = m
 		}
 	}
 	// eino 默认是把分高的排在两边，这里我xiu gai

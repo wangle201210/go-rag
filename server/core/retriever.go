@@ -11,8 +11,10 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/qdrant/go-client/qdrant"
 	"github.com/wangle201210/go-rag/server/core/common"
 	"github.com/wangle201210/go-rag/server/core/rerank"
+	coretypes "github.com/wangle201210/go-rag/server/core/types"
 )
 
 type RetrieveReq struct {
@@ -146,35 +148,88 @@ func (x *Rag) retrieveDoOnce(ctx context.Context, req *RetrieveReq) (relatedDocs
 }
 
 func (x *Rag) retrieve(ctx context.Context, req *RetrieveReq, qa bool) (msg []*schema.Document, err error) {
-	esQuery := []types.Query{
-		{
-			Bool: &types.BoolQuery{
-				Must: []types.Query{{Match: map[string]types.MatchQuery{common.KnowledgeName: {Query: req.KnowledgeName}}}},
-			},
-		},
+	// 准备检索选项
+	retrieveOpts := []er.Option{
+		er.WithTopK(esTopK),
 	}
-	if len(req.excludeIDs) > 0 {
-		esQuery[0].Bool.MustNot = []types.Query{
+
+	// 根据向量存储类型添加不同的过滤条件
+	if x.conf.Client != nil {
+		// ES 过滤条件
+		esQuery := []types.Query{
 			{
-				Terms: &types.TermsQuery{
-					TermsQuery: map[string]types.TermsQueryField{
-						"_id": req.excludeIDs,
+				Bool: &types.BoolQuery{
+					Must: []types.Query{{Match: map[string]types.MatchQuery{coretypes.KnowledgeName: {Query: req.KnowledgeName}}}},
+				},
+			},
+		}
+		if len(req.excludeIDs) > 0 {
+			esQuery[0].Bool.MustNot = []types.Query{
+				{
+					Terms: &types.TermsQuery{
+						TermsQuery: map[string]types.TermsQueryField{
+							"_id": req.excludeIDs,
+						},
+					},
+				},
+			}
+		}
+		retrieveOpts = append(retrieveOpts, es8.WithFilters(esQuery))
+	} else if x.conf.QdrantClient != nil {
+		// Qdrant 过滤条件
+		qdrantFilter := &qdrant.Filter{
+			Must: []*qdrant.Condition{
+				{
+					ConditionOneOf: &qdrant.Condition_Field{
+						Field: &qdrant.FieldCondition{
+							Key: coretypes.KnowledgeName,
+							Match: &qdrant.Match{
+								MatchValue: &qdrant.Match_Keyword{
+									Keyword: req.KnowledgeName,
+								},
+							},
+						},
 					},
 				},
 			},
 		}
+
+		// 添加排除 ID 的条件
+		if len(req.excludeIDs) > 0 {
+			// 将 string IDs 转换为 PointId
+			excludePointIds := make([]*qdrant.PointId, len(req.excludeIDs))
+			for i, id := range req.excludeIDs {
+				excludePointIds[i] = &qdrant.PointId{
+					PointIdOptions: &qdrant.PointId_Uuid{Uuid: id},
+				}
+			}
+
+			qdrantFilter.MustNot = []*qdrant.Condition{
+				{
+					ConditionOneOf: &qdrant.Condition_HasId{
+						HasId: &qdrant.HasIdCondition{
+							HasId: excludePointIds,
+						},
+					},
+				},
+			}
+		}
+
+		// 通过 DSLInfo 传递过滤条件（自定义 retriever 会读取）
+		retrieveOpts = append(retrieveOpts, er.WithDSLInfo(map[string]any{
+			"filter": qdrantFilter,
+		}))
 	}
+
 	r := x.rtrvr
 	if qa {
 		r = x.qaRtrvr
 	}
+
 	msg, err = r.Invoke(ctx, req.optQuery,
-		compose.WithRetrieverOption(
-			// er.WithScoreThreshold(req.Score), // 不限制分数，只限制数量，最终分数由rerank给
-			er.WithTopK(esTopK),
-			es8.WithFilters(esQuery),
-		),
+		compose.WithRetrieverOption(retrieveOpts...),
 	)
+
 	for _, s := range msg {
 		if s.Score() > 1 {
 			// 本身没意义，最终分数由rerank给，这里只是为了方便测试观察
