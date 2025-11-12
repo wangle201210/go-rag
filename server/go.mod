@@ -16,6 +16,7 @@ require (
 	github.com/cloudwego/eino-ext/components/document/transformer/splitter/recursive v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/indexer/es8 v0.0.0-20250610035057-2c4e7c8488a5
+	github.com/cloudwego/eino-ext/components/indexer/qdrant v0.0.0-20251107064029-2e128d3d2258
 	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/cloudwego/eino-ext/components/model/qwen v0.0.0-20250610035057-2c4e7c8488a5
 	github.com/cloudwego/eino-ext/components/retriever/es8 v0.0.0-20250610035057-2c4e7c8488a5
@@ -25,6 +26,7 @@ require (
 	github.com/gogf/gf/v2 v2.9.0
 	github.com/google/uuid v1.6.0
 	github.com/qdrant/go-client v1.15.2
+	github.com/wangle201210/chat-history v0.0.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.30.0
@@ -38,8 +40,6 @@ require (
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/cloudwego/eino-ext/components/indexer/qdrant v0.0.0-20251107064029-2e128d3d2258 // indirect
-	github.com/cloudwego/eino-ext/components/retriever/qdrant v0.0.0-20251107064029-2e128d3d2258 // indirect
 	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250610035057-2c4e7c8488a5 // indirect
 	github.com/dslipak/pdf v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
