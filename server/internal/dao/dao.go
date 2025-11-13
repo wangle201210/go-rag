@@ -3,6 +3,8 @@ package dao
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -43,6 +45,10 @@ func InitDB() error {
 		if filePath == "" {
 			return fmt.Errorf("sqlite file path is required when using sqlite")
 		}
+		// 确保 SQLite 文件的父目录存在
+		if err := ensureSQLiteFileDir(filePath); err != nil {
+			return fmt.Errorf("failed to create sqlite file directory: %v", err)
+		}
 		dsn := buildSQLiteDSN(ctx, filePath)
 		dialector = sqlite.Open(dsn)
 	case "mysql":
@@ -78,6 +84,23 @@ func InitDB() error {
 	// 自动迁移数据库表结构
 	if err = gormModel.AutoMigrate(db); err != nil {
 		return fmt.Errorf("failed to migrate database tables: %v", err)
+	}
+
+	return nil
+}
+
+// ensureSQLiteFileDir 确保 SQLite 文件的父目录存在
+func ensureSQLiteFileDir(filePath string) error {
+	// 获取文件的目录路径
+	dir := filepath.Dir(filePath)
+
+	// 检查目录是否存在
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		// 目录不存在，创建目录（包括所有必要的父目录）
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %v", dir, err)
+		}
+		g.Log().Infof(context.Background(), "Created directory for SQLite database: %s", dir)
 	}
 
 	return nil

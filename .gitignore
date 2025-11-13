@@ -50,3 +50,7 @@ server/manifest/config/config.yaml
 *.sqlite3
 *.lock
 *.json
+/storage/
+/snapshots/
+/server/?_journal_mode=WAL
+/static/

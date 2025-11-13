@@ -11,7 +11,7 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/wangle201210/go-rag/server/chat-history/eino"
+	"github.com/wangle201210/chat-history/eino"
 	"github.com/wangle201210/go-rag/server/internal/dao"
 )
 
