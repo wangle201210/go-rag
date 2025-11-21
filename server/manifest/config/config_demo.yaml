@@ -60,4 +60,4 @@ qa:
 chat:
   apiKey: "sk-****"
   baseURL: "https://api.siliconflow.cn/v1"
-  model: "deepseek-ai/DeepSeek-V3""
+  model: "deepseek-ai/DeepSeek-V3"
