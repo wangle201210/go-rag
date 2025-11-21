@@ -2,10 +2,11 @@ package db
 
 import (
 	"fmt"
+	"time"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"time"
 )
 
 type Mysql struct {
@@ -41,7 +42,7 @@ func (m *Mysql) Connect() error {
 
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	m.db = db
+	m.DB = db
 	return nil
 }
 

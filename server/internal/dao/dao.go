@@ -3,10 +3,11 @@ package dao
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	database "github.com/wangle201210/go-rag/server/internal/dao/db"
 	"os"
 	"path/filepath"
+
+	"github.com/gogf/gf/v2/frame/g"
+	database "github.com/wangle201210/go-rag/server/internal/dao/db"
 )
 
 var db database.Database
@@ -36,6 +37,8 @@ func InitDB() error {
 			return err
 		}
 		db = database.NewSqlite(cfg)
+	default:
+		return fmt.Errorf("unsupported database type: %s", dbType)
 	}
 	if err = db.Connect(); err != nil {
 		return err
@@ -79,7 +82,7 @@ func GetSqliteConfig() (*database.Config, error) {
 		return nil, fmt.Errorf("failed to create sqlite file directory: %v", err)
 	}
 	cfg.BusyTimeout = g.Cfg().MustGet(ctx, "database.default.busy_timeout").Int()
-	cfg.JournalNode = g.Cfg().MustGet(ctx, "database.default.journal_mode").String()
+	cfg.JournalMode = g.Cfg().MustGet(ctx, "database.default.journal_mode").String()
 	cfg.Synchronous = g.Cfg().MustGet(ctx, "database.default.synchronous").String()
 	cfg.CacheSize = g.Cfg().MustGet(ctx, "database.default.cache_size").Int()
 	cfg.MaxOpenConn = g.Cfg().MustGet(ctx, "database.default.max_open_conns", 1).Int()

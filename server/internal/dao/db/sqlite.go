@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"strings"
-	"time"
 )
 
 type SQLite struct {
@@ -40,15 +41,15 @@ func (s *SQLite) Connect() error {
 
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	s.db = db
+	s.DB = db
 	return nil
 }
 
 func (s *SQLite) DSN() string {
 	var dsn string
 	var params []string
-	if s.cfg.JournalNode != "" {
-		params = append(params, fmt.Sprintf("_journal_mode=%s", s.cfg.JournalNode))
+	if s.cfg.JournalMode != "" {
+		params = append(params, fmt.Sprintf("_journal_mode=%s", s.cfg.JournalMode))
 	}
 	if s.cfg.Synchronous != "" {
 		params = append(params, fmt.Sprintf("_synchronous=%s", s.cfg.Synchronous))
@@ -65,4 +66,3 @@ func (s *SQLite) DSN() string {
 	}
 	return dsn
 }
-
