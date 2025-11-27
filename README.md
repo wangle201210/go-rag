@@ -14,12 +14,18 @@
 6. mcp （以集成到deepchat为例）
    ![](./server/static/mcp-cfg.png)
    ![](./server/static/mcp-use.png)
+7. 基于go-rag 实现了一个兼容mac和windows的gui，直接双击即可完成所有安装，不再依赖docker安装mysql,es等依赖  
+   [wachat](https://github.com/wangle201210/wachat)
+   ![](./server/static/rag.png)
+   ![](./server/static/wachat.png)
+
 
 ## roadmap
 [roadmap](./roadmap.md)
 
 ## 存储层
 - [x] es8存储向量相关数据
+- [x] qdrant存储向量相关数据
 
 ## 功能列表
 - [x] md、pdf、html 文档解析
@@ -52,7 +58,7 @@ docker compose up -d
 ```bash
 cp server/manifest/config/config_demo.yaml server/manifest/config/config.yaml 
 # 修改配置文件中的embedding、chat、mysql、es等配置
-make build
+make build # 这里会构建前后端项目
 make run
 # 浏览器打开 http://localhost:8000
 ````
