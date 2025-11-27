@@ -54,3 +54,4 @@ server/manifest/config/config.yaml
 /snapshots/
 /server/?_journal_mode=WAL
 /static/
+/releases/
