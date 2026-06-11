@@ -46,9 +46,23 @@ var rerankCfg *Conf
 func NewRerank(ctx context.Context, query string, docs []*schema.Document, topK int) (output []*schema.Document, err error) {
 	output, err = rerank(ctx, query, docs, topK)
 	if err != nil {
-		return
+		g.Log().Warningf(ctx, "Rerank remote failed, fallback to RRF: %v", err)
+		return rrfFallback(docs, topK), nil
 	}
-	return
+	return output, nil
+}
+
+// rrfFallback 用 RRF 算法对单路结果（已按原始 score 排好序）重新打分并截断到 topK。
+// 单路 RRF 本质上保持原顺序，但把分数统一到可比较的 1/(k+rank) 量纲。
+func rrfFallback(docs []*schema.Document, topK int) []*schema.Document {
+	const k = 60
+	for rank, doc := range docs {
+		doc.WithScore(1.0 / float64(k+rank+1))
+	}
+	if topK > 0 && len(docs) > topK {
+		return docs[:topK]
+	}
+	return docs
 }
 
 func GetConf(ctx context.Context) *Conf {
