@@ -34,12 +34,13 @@ func HandleWebSearch(ctx context.Context, toolReq *protocol.CallToolRequest) (re
 		TopK:     req.TopK,
 	})
 	if err != nil {
-		// 联网检索未配置属于可预期的情况，作为友好文本返回，而不是协议错误
+		// 联网检索失败属于可预期的情况（未配置、限流等），作为友好文本返回，而不是协议错误
+		// 具体原因与处理建议已包含在 err 信息中
 		return &protocol.CallToolResult{
 			Content: []protocol.Content{
 				&protocol.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("联网检索暂不可用：%v，请配置 YDC_API_KEY 后重试", err),
+					Text: fmt.Sprintf("联网检索暂不可用：%v", err),
 				},
 			},
 		}, nil

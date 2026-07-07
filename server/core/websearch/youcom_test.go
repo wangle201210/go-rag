@@ -302,3 +302,33 @@ func TestRetrieve_APIKeyPrecedence(t *testing.T) {
 func containsKey(s, key string) bool {
 	return len(key) > 0 && strings.Contains(s, key)
 }
+
+func TestRetrieve_TopKTruncatesTotalResults(t *testing.T) {
+	srv := newTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"results":{
+			"web":[
+				{"url":"https://a.com","title":"A","description":"d"},
+				{"url":"https://b.com","title":"B","description":"d"}
+			],
+			"news":[
+				{"url":"https://c.com","title":"C","description":"d"},
+				{"url":"https://d.com","title":"D","description":"d"}
+			]
+		}}`))
+	})
+
+	r, _ := NewRetriever(&Config{APIKey: "k", BaseURL: srv.URL})
+	docs, err := r.Retrieve(context.Background(), "q", retriever.WithTopK(2))
+	if err != nil {
+		t.Fatalf("Retrieve failed: %v", err)
+	}
+	// web 与 news 双通道合计可能超过 TopK，Retrieve 需按总数截断，
+	// 且 web 结果（分数更高）优先保留
+	if len(docs) != 2 {
+		t.Fatalf("got %d docs, want 2 (TopK must bound total results)", len(docs))
+	}
+	if docs[0].ID != "https://a.com" || docs[1].ID != "https://b.com" {
+		t.Errorf("expected web docs kept first after truncation, got %v, %v", docs[0].ID, docs[1].ID)
+	}
+}

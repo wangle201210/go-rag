@@ -146,7 +146,13 @@ func (r *YouComRetriever) Retrieve(ctx context.Context, query string, opts ...re
 		return nil, fmt.Errorf("解析 you.com 响应失败: %w", err)
 	}
 
-	return toDocuments(&payload), nil
+	docs := toDocuments(&payload)
+	// web 与 news 双通道各返回最多 count 条，这里按总数截断，
+	// 保证调用方拿到的结果数量与 TopK 语义一致（与 /v1/retriever 行为对齐）
+	if len(docs) > count {
+		docs = docs[:count]
+	}
+	return docs, nil
 }
 
 // buildRequest 构建 you.com search 请求：GET + X-API-Key header + query/count 参数
