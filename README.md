@@ -36,6 +36,7 @@
 - [x] chunk 编辑
 - [x] 自动生成 QA 对
 - [x] 多路召回
+- [x] You.com 联网检索（可选，需 YDC_API_KEY）
 
 ## 使用
 ### clone项目
@@ -62,6 +63,11 @@ make build # 这里会构建前后端项目
 make run
 # 浏览器打开 http://localhost:8000
 ````
+
+### 联网检索（可选）
+如需启用 You.com 联网检索（`POST /v1/websearch` 接口 + MCP `web_search` 工具），设置环境变量 `YDC_API_KEY`
+（获取地址 https://you.com/platform/api-keys），或在 `config.yaml` 的 `websearch.youcom.apiKey` 中填写。
+未配置时该功能不影响其他功能正常使用，调用时会返回提示信息。
 
 ### 安装依赖
 *如果有可用的es8和mysql,可以不用安装*  
