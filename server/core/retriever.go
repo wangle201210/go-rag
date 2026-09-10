@@ -14,6 +14,7 @@ import (
 	"github.com/qdrant/go-client/qdrant"
 	"github.com/wangle201210/go-rag/server/core/common"
 	"github.com/wangle201210/go-rag/server/core/rerank"
+	"github.com/wangle201210/go-rag/server/core/retriever"
 	coretypes "github.com/wangle201210/go-rag/server/core/types"
 )
 
@@ -114,23 +115,34 @@ func (x *Rag) retrieveDoOnce(ctx context.Context, req *RetrieveReq) (relatedDocs
 		qaDocs []*schema.Document
 	)
 	g.Log().Infof(ctx, "query: %v", req.optQuery)
-	// 通过内容检索
+	// 向量路一：content_vector
 	docs, err = x.retrieve(ctx, req, false)
 	if err != nil {
 		g.Log().Errorf(ctx, "retrieve failed, err=%v", err)
 		return
 	}
-	// 通过qa检索
+	// 向量路二：qa_content_vector
 	qaDocs, err = x.retrieve(ctx, req, true)
 	if err != nil {
 		g.Log().Errorf(ctx, "qa retrieve failed, err=%v", err)
 		return
 	}
-	docs = append(docs, qaDocs...)
-	// 去重
-	docs = common.RemoveDuplicates(docs, func(doc *schema.Document) string {
-		return doc.ID
-	})
+
+	inputs := [][]*schema.Document{docs, qaDocs}
+
+	// 关键字路三：ES BM25（conf.Client != nil 时生效）
+	if x.conf.Client != nil {
+		bm25Docs, bm25Err := retriever.Bm25Retrieve(ctx, x.conf.Client, x.conf.IndexName, req.KnowledgeName, req.optQuery, req.excludeIDs, esTopK)
+		if bm25Err != nil {
+			g.Log().Warningf(ctx, "bm25 retrieve failed, skip: %v", bm25Err)
+		} else {
+			inputs = append(inputs, bm25Docs)
+		}
+	}
+
+	// RRF 融合多路结果（同时完成去重）
+	docs = retriever.RRFFusion(inputs)
+
 	// 重排
 	docs, err = rerank.NewRerank(ctx, req.optQuery, docs, req.TopK)
 	if err != nil {
