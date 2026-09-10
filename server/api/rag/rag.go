@@ -27,4 +27,5 @@ type IRagV1 interface {
 	KBGetList(ctx context.Context, req *v1.KBGetListReq) (res *v1.KBGetListRes, err error)
 	Retriever(ctx context.Context, req *v1.RetrieverReq) (res *v1.RetrieverRes, err error)
 	RetrieverDify(ctx context.Context, req *v1.RetrieverDifyReq) (res *v1.RetrieverDifyRes, err error)
+	WebSearch(ctx context.Context, req *v1.WebSearchReq) (res *v1.WebSearchRes, err error)
 }

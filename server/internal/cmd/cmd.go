@@ -45,6 +45,7 @@ func Mcp(ctx context.Context, s *ghttp.Server) {
 	mcpServer, _ := server.NewServer(trans)
 	mcpServer.RegisterTool(mcp.GetRetrieverTool(), mcp.HandleRetriever)
 	mcpServer.RegisterTool(mcp.GetKnowledgeBaseTool(), mcp.HandleKnowledgeBase)
+	mcpServer.RegisterTool(mcp.GetWebSearchTool(), mcp.HandleWebSearch)
 	// start mcp Server
 	go func() {
 		mcpServer.Run()

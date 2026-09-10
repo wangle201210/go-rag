@@ -61,3 +61,9 @@ chat:
   apiKey: "sk-****"
   baseURL: "https://api.siliconflow.cn/v1"
   model: "deepseek-ai/DeepSeek-V3"
+
+websearch:
+  youcom:
+    apiKey: "" # You.com Search API Key，留空时读取环境变量 YDC_API_KEY（获取地址 https://you.com/platform/api-keys）
+    count: 5 # 默认返回结果数量
+    timeout: 10 # 请求超时时间（秒）
