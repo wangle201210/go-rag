@@ -332,3 +332,37 @@ func TestRetrieve_TopKTruncatesTotalResults(t *testing.T) {
 		t.Errorf("expected web docs kept first after truncation, got %v, %v", docs[0].ID, docs[1].ID)
 	}
 }
+
+func TestRetrieve_ZeroTopKUsesConfiguredCount(t *testing.T) {
+	srv := newTestServer(t, func(w http.ResponseWriter, req *http.Request) {
+		if got := req.URL.Query().Get("count"); got != "3" {
+			t.Errorf("count = %q, want configured count 3", got)
+		}
+		w.Write([]byte(`{"results":{"web":[]}}`))
+	})
+	r, err := NewRetriever(&Config{APIKey: "k", BaseURL: srv.URL, Count: 3})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := r.Retrieve(context.Background(), "q", retriever.WithTopK(0)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRetrieve_RejectsInvalidParametersBeforeRequest(t *testing.T) {
+	srv := newTestServer(t, func(w http.ResponseWriter, req *http.Request) {
+		t.Error("invalid parameters must not reach the provider")
+	})
+	r, err := NewRetriever(&Config{APIKey: "k", BaseURL: srv.URL})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, query := range []string{"", " \n\t "} {
+		if _, err := r.Retrieve(context.Background(), query); err == nil {
+			t.Error("expected blank query error")
+		}
+	}
+	if _, err := r.Retrieve(context.Background(), "q", retriever.WithTopK(-1)); err == nil {
+		t.Error("expected negative top_k error")
+	}
+}

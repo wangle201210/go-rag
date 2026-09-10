@@ -12,7 +12,7 @@ import (
 
 type WebSearchParam struct {
 	Question string `json:"question" description:"用户提问的问题，将通过 You.com 联网检索" required:"true"`
-	TopK     int    `json:"top_k" description:"检索结果的数量，默认为5" required:"false"` // 默认为5
+	TopK     int    `json:"top_k" description:"检索结果数量；不传时使用服务端配置（默认5）" required:"false"` // 默认为5
 }
 
 func GetWebSearchTool() *protocol.Tool {
@@ -37,6 +37,7 @@ func HandleWebSearch(ctx context.Context, toolReq *protocol.CallToolRequest) (re
 		// 联网检索失败属于可预期的情况（未配置、限流等），作为友好文本返回，而不是协议错误
 		// 具体原因与处理建议已包含在 err 信息中
 		return &protocol.CallToolResult{
+			IsError: true,
 			Content: []protocol.Content{
 				&protocol.TextContent{
 					Type: "text",

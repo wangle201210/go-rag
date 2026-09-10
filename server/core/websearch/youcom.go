@@ -18,6 +18,7 @@ import (
 
 	"github.com/cloudwego/eino/components/retriever"
 	"github.com/cloudwego/eino/schema"
+	"github.com/gogf/gf/v2/errors/gerror"
 )
 
 const (
@@ -25,13 +26,13 @@ const (
 	defaultBaseURL = "https://ydc-index.io/v1/search"
 	// defaultCount 默认返回结果数量
 	defaultCount = 5
-	// maxCount 单次请求允许的最大返回结果数量
+	// maxCount 本组件限制的最大返回结果数量
 	maxCount = 20
 	// defaultTimeout 默认请求超时时间
 	defaultTimeout = 10 * time.Second
 	// sourceName 结果来源标识，写入 MetaData
 	sourceName = "you.com"
-	// apiKeyEnv You.com API Key 的环境变量名（团队约定，不可更改）
+	// apiKeyEnv You.com API Key 的环境变量名
 	apiKeyEnv = "YDC_API_KEY"
 )
 
@@ -105,6 +106,9 @@ func (r *YouComRetriever) resolveAPIKey() string {
 
 // Retrieve 调用 You.com Search API 检索网页结果，实现 eino retriever.Retriever 接口
 func (r *YouComRetriever) Retrieve(ctx context.Context, query string, opts ...retriever.Option) ([]*schema.Document, error) {
+	if strings.TrimSpace(query) == "" {
+		return nil, gerror.New("联网检索问题不能为空")
+	}
 	key := r.resolveAPIKey()
 	if key == "" {
 		return nil, fmt.Errorf("未配置 You.com API Key，请设置环境变量 %s 或在配置文件 websearch.youcom.apiKey 中填写", apiKeyEnv)
@@ -113,6 +117,9 @@ func (r *YouComRetriever) Retrieve(ctx context.Context, query string, opts ...re
 	options := &retriever.Options{}
 	retriever.GetCommonOptions(options, opts...)
 
+	if options.TopK != nil && *options.TopK < 0 {
+		return nil, gerror.New("联网检索 top_k 不能为负数")
+	}
 	count := r.cfg.Count
 	if options.TopK != nil && *options.TopK > 0 {
 		count = *options.TopK

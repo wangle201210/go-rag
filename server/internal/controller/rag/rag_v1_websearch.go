@@ -18,9 +18,6 @@ func (c *ControllerV1) WebSearch(ctx context.Context, req *v1.WebSearchReq) (res
 	if svr == nil {
 		return nil, gerror.New("联网检索未配置，请设置环境变量 YDC_API_KEY 或在配置文件 websearch.youcom.apiKey 中填写 You.com API Key")
 	}
-	if req.TopK == 0 {
-		req.TopK = 5
-	}
 	g.Log().Infof(ctx, "webSearchReq: %v", req)
 	docs, err := svr.Retrieve(ctx, req.Question, retriever.WithTopK(req.TopK))
 	if err != nil {
