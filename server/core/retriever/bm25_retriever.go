@@ -2,32 +2,32 @@ package retriever
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cloudwego/eino/schema"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/gogf/gf/v2/errors/gerror"
 	coretypes "github.com/wangle201210/go-rag/server/core/types"
 )
 
 // Bm25Retrieve 使用 ES BM25 对 content 字段做全文检索。
-// 仅在 conf.ESClient != nil 时调用。
+// 仅在使用 ES 向量存储时调用，复用同一索引中的文档。
 func Bm25Retrieve(ctx context.Context, client *elasticsearch.Client, indexName, knowledgeName, query string, excludeIDs []string, topK int) ([]*schema.Document, error) {
-	must := []types.Query{
-		{Match: map[string]types.MatchQuery{
-			coretypes.FieldContent: {Query: query},
-		}},
-		{Bool: &types.BoolQuery{
-			Must: []types.Query{
-				{Match: map[string]types.MatchQuery{
-					coretypes.KnowledgeName: {Query: knowledgeName},
-				}},
-			},
-		}},
+	if client == nil {
+		return nil, gerror.New("bm25 requires an ES client")
 	}
-
-	boolQuery := &types.BoolQuery{Must: must}
+	if topK <= 0 {
+		return nil, gerror.New("bm25 topK must be positive")
+	}
+	boolQuery := &types.BoolQuery{
+		Must: []types.Query{{Match: map[string]types.MatchQuery{
+			coretypes.FieldContent: {Query: query},
+		}}},
+		Filter: []types.Query{{Term: map[string]types.TermQuery{
+			coretypes.KnowledgeName: {Value: knowledgeName},
+		}}},
+	}
 
 	if len(excludeIDs) > 0 {
 		boolQuery.MustNot = []types.Query{
@@ -48,14 +48,14 @@ func Bm25Retrieve(ctx context.Context, client *elasticsearch.Client, indexName, 
 		Request(sreq).
 		Do(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("bm25 search failed: %w", err)
+		return nil, gerror.Wrap(err, "bm25 search failed")
 	}
 
 	var docs []*schema.Document
 	for _, hit := range resp.Hits.Hits {
 		doc, err := EsHit2Document(ctx, hit)
 		if err != nil {
-			continue
+			return nil, gerror.Wrap(err, "parse bm25 search result")
 		}
 		docs = append(docs, doc)
 	}

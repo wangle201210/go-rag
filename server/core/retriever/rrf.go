@@ -6,36 +6,41 @@ import (
 	"github.com/cloudwego/eino/schema"
 )
 
-// RRFFusion 对多路召回结果执行 RRF（Reciprocal Rank Fusion）融合。
-// inputs 每个元素是一路召回的有序文档列表（按相关性降序）。
+// RRFFusion 融合按相关性降序排列的召回列表，每个文档在每一路最多贡献一次分数。
+// 同分时保留首次出现顺序，不修改调用方的文档或元数据。
 func RRFFusion(inputs [][]*schema.Document) []*schema.Document {
 	const k = 60
-
-	docScores := make(map[string]float64)
-	docMap := make(map[string]*schema.Document)
-
+	var (
+		docScores = make(map[string]float64)
+		docMap    = make(map[string]*schema.Document)
+		result    = make([]*schema.Document, 0)
+	)
 	for _, docs := range inputs {
-		for rank, doc := range docs {
-			if doc.ID == "" {
+		seen := make(map[string]bool)
+		rank := 0
+		for _, doc := range docs {
+			if doc == nil || doc.ID == "" || seen[doc.ID] {
 				continue
 			}
-			docScores[doc.ID] += 1.0 / float64(k+rank+1)
+			seen[doc.ID] = true
+			rank++
+			docScores[doc.ID] += 1.0 / float64(k+rank)
 			if _, exists := docMap[doc.ID]; !exists {
-				docMap[doc.ID] = doc
+				cloned := *doc
+				cloned.MetaData = make(map[string]any, len(doc.MetaData)+1)
+				for key, value := range doc.MetaData {
+					cloned.MetaData[key] = value
+				}
+				docMap[doc.ID] = &cloned
+				result = append(result, &cloned)
 			}
 		}
 	}
-
-	result := make([]*schema.Document, 0, len(docMap))
-	for id, score := range docScores {
-		doc := docMap[id]
-		doc.WithScore(score)
-		result = append(result, doc)
+	for _, doc := range result {
+		doc.WithScore(docScores[doc.ID])
 	}
-
-	sort.Slice(result, func(i, j int) bool {
+	sort.SliceStable(result, func(i, j int) bool {
 		return result[i].Score() > result[j].Score()
 	})
-
 	return result
 }

@@ -55,19 +55,6 @@ func init() {
 		client = esStore.GetClient()
 	} else if qdrantStore, ok := vectorStore.(*vector.QdrantVectorStore); ok {
 		qdrantClient = qdrantStore.GetClient()
-		// Qdrant 模式下，若配置了 ES 地址则初始化 ES 客户端用于 BM25 混合检索
-		esAddr := g.Cfg().MustGet(ctx, "vector.es.address").String()
-		if esAddr != "" {
-			client, err = elasticsearch.NewClient(elasticsearch.Config{
-				Addresses: []string{esAddr},
-				Username:  g.Cfg().MustGet(ctx, "vector.es.username").String(),
-				Password:  g.Cfg().MustGet(ctx, "vector.es.password").String(),
-			})
-			if err != nil {
-				g.Log().Warningf(ctx, "init ES client for BM25 failed, hybrid retrieval disabled: %v", err)
-				client = nil
-			}
-		}
 	}
 
 	ragSvr, err = core.New(ctx, &config.Config{
