@@ -1,6 +1,7 @@
 package rerank
 
 import (
+	"os"
 	"testing"
 
 	"github.com/cloudwego/eino/schema"
@@ -8,8 +9,14 @@ import (
 )
 
 func TestRerank(t *testing.T) {
+	// 该测试会真实调用 rerank 在线接口，未配置 RERANK_API_KEY 时跳过，
+	// 保证 go test ./... 可以离线通过
+	apiKey := os.Getenv("RERANK_API_KEY")
+	if apiKey == "" {
+		t.Skip("未设置环境变量 RERANK_API_KEY，跳过 rerank 在线测试")
+	}
 	rerankCfg = &Conf{
-		apiKey:          "sk-***",
+		apiKey:          apiKey,
 		Model:           "BAAI/bge-reranker-v2-m3",
 		ReturnDocuments: false,
 		MaxChunksPerDoc: 1024,
@@ -23,7 +30,7 @@ func TestRerank(t *testing.T) {
 		{Content: "apple"},
 		{Content: "vegetable"},
 	}
-	output, err := Rerank(ctx, "水果", docs, 2)
+	output, err := NewRerank(ctx, "水果", docs, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
